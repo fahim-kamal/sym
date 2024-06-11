@@ -1,58 +1,44 @@
-import pusherJs from "pusher-js";
 import { useEffect, useState } from "react";
 
-/**
- * @param {pusherJs} pusherClient
- */
-function useChannel(pusherClient, channelName) {
-  useEffect(() => {
-    const canSubscribe =
-      pusherClient !== undefined &&
-      pusherClient.connection.state === "connected";
+import { usePusher } from "./usePusher";
+import { useChannelStore } from "./useChannelStore";
 
-    if (canSubscribe) {
-      pusherClient.subscribe(channelName);
-    }
+function usePrivateChannel(channelName) {
+  const { pusherClient } = usePusher();
+  const { addChannel, removeChannel, getChannel } = useChannelStore();
 
-    return () => {
-      if (pusherClient !== undefined) {
-        pusherClient.unsubscribe(channelName);
-      }
-    };
-  }, [pusherClient?.connection, channelName]);
-}
-
-/**
- * @param {pusherJs} pusherClient
- */
-function usePrivateChannel(pusherClient, channelName) {
   const [binded, setBinded] = useState(false);
 
   useEffect(() => {
-    const canSignIn =
-      pusherClient !== undefined &&
-      pusherClient.connection.state === "connected";
+    const channelCallback = () => {
+      addChannel(channelName, pusherClient.subscribe(channelName));
+    };
 
     const signInEvent = "pusher:signin_success";
 
-    const channelCB = () => {
-      pusherClient.subscribe(channelName);
-    };
+    if (getChannel(channelName) === undefined) {
+      const canSignIn =
+        pusherClient !== undefined &&
+        pusherClient.connection.state === "connected";
 
-    if (canSignIn) {
-      pusherClient.signin();
-
-      pusherClient.bind(signInEvent, channelCB);
-      setBinded(true);
+      if (canSignIn) {
+        pusherClient.signin();
+        pusherClient.bind(signInEvent, channelCallback);
+        setBinded(true);
+      }
     }
 
     return () => {
       if (binded) {
-        pusherClient.unbind(signInEvent, channelCB);
+        pusherClient.unbind(signInEvent, channelCallback);
+        pusherClient.unsubscribe(channelName);
         setBinded(false);
+        removeChannel(channelName);
       }
     };
   }, [pusherClient?.connection.state, channelName]);
+
+  return getChannel(channelName);
 }
 
-export { useChannel, usePrivateChannel };
+export { usePrivateChannel };

@@ -3,35 +3,46 @@ import {
   pusherAuthenticateEndpoint,
   pusherAuthorizeEndpoint,
 } from "@/lib/pusher";
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
+import { PusherContext } from "@/context/pusherContext";
 
 export const usePusher = () => {
-  const [connection, setConnection] = useState();
+  const { pusherClient, setPusherClient } = useContext(PusherContext);
 
   useEffect(() => {
-    const pusherClient = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-      enabledTransports: ["ws"],
-      authEndpoint: pusherAuthorizeEndpoint,
-      authTransport: "ajax",
-      userAuthentication: {
-        endpoint: pusherAuthenticateEndpoint,
-      },
-      forceTLS: true,
-    });
+    if (pusherClient === undefined) {
+      const pusherInstance = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
+        cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+        enabledTransports: ["ws"],
+        authEndpoint: pusherAuthorizeEndpoint,
+        authTransport: "ajax",
+        userAuthentication: {
+          endpoint: pusherAuthenticateEndpoint,
+        },
+        forceTLS: true,
+      });
 
-    const connectionCallback = () => {
-      setConnection(pusherClient);
-    };
+      const clientCallback = () => {
+        setPusherClient(pusherInstance);
+      };
 
-    pusherClient.connection.bind("connected", connectionCallback);
+      const disconnectCallback = () => {
+        setPusherClient(undefined);
+      };
+
+      pusherInstance.connection.bind("connected", clientCallback);
+      pusherInstance.connection.bind("disconnected", disconnectCallback);
+    }
 
     return () => {
-      pusherClient.disconnect();
-      pusherClient.connection.unbind("connected", connectionCallback);
-      setConnection(null);
+      if (pusherClient !== undefined) {
+        pusherClient.disconnect();
+        pusherClient.connection.unbind("connected", connectionCallback);
+        pusherClient.connection.unbind("disconnected", disconnectCallback);
+        setPusherClient(undefined);
+      }
     };
   }, []);
 
-  return connection;
+  return { pusherClient };
 };
