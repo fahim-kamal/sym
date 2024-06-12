@@ -37,7 +37,7 @@ export const usePusher = () => {
     return () => {
       if (pusherClient !== undefined) {
         pusherClient.disconnect();
-        pusherClient.connection.unbind("connected", connectionCallback);
+        pusherClient.connection.unbind("connected", clientCallback);
         pusherClient.connection.unbind("disconnected", disconnectCallback);
         setPusherClient(undefined);
       }

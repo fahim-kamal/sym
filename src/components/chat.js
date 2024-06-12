@@ -9,11 +9,17 @@ export default function Chat() {
   const channel = usePrivateChannel("private-channel");
 
   const [messages, setMessages] = useState([]);
+  const [current, setCurrent] = useState("");
 
   const cb = useCallback((data) => {
-    console.count("EVENT BINDED");
     setMessages((prev) => [...prev, data]);
   }, []);
+
+  const sendMessage = useCallback(() => {
+    if (channel) {
+      channel.trigger("client-chat", current);
+    }
+  }, [channel]);
 
   useEvent(channel, "chat", cb);
 
@@ -27,12 +33,13 @@ export default function Chat() {
       <input
         className="border-2"
         onChange={(event) => {
-          // setInputMessage(event.target.value);
+          setCurrent(event.target.value);
         }}
       />
       <button
         onClick={() => {
-          // sendMessage(inputMessage);
+          sendMessage();
+          setMessages((prev) => [...prev, current]);
         }}
       >
         submit
