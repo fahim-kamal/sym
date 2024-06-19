@@ -1,6 +1,5 @@
 "use client";
 
-import { usePusher } from "@/hooks/usePusher";
 import { usePrivateChannel } from "@/hooks/useChannel";
 import { useEvent } from "@/hooks/useEvent";
 import { useState, useCallback } from "react";
