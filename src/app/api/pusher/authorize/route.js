@@ -5,8 +5,6 @@ export async function POST(req) {
   const socket_id = formData.get("socket_id");
   const channel_name = formData.get("channel_name");
 
-  console.log(channel_name);
-
   const authorizeResponse = pusherServer.authorizeChannel(
     socket_id,
     channel_name

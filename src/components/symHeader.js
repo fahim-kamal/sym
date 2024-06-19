@@ -1,4 +1,3 @@
-import Image from "next/image";
 import SymLogo from "./symLogo";
 
 export default function SymHeader() {
