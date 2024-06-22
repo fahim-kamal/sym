@@ -56,7 +56,7 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
   const pageToAdd: GoalPageEntity = {
     id: uuidv4(),
     name: "test goal page",
-    deadline: null,
+    deadline: new Date(),
     icon_url: null,
     banner_url: null,
   };
@@ -79,7 +79,11 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
   });
 
   test("GoalPage update", async () => {
-    const pageToBeUpdated = { ...pageToAdd, icon_url: "example.imageurl.com" };
+    const pageToBeUpdated = {
+      ...pageToAdd,
+      deadline: new Date(),
+      icon_url: "example.imageurl.com",
+    };
     const updatedPage = await tursoGoalPageRepo.updatePage(pageToBeUpdated);
     expect(updatedPage).toBeDefined();
     expect(updatedPage).toStrictEqual(pageToBeUpdated);

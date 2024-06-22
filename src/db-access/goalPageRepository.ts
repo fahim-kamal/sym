@@ -29,16 +29,17 @@ export class TursoGoalPageRepo implements GoalPageRepository {
     goalPage: GoalPageEntity
   ): Promise<GoalPageEntity> {
     const _userGoal: UserGoalEntity = { ...userGoal, goal_id: goalPage.id };
+    const _goalPage = this.dateStringNormalizer(goalPage);
 
     const goalPageEntity = this.db
       .batchAndReturnObjects([
         {
           sql: `
       INSERT INTO GoalPage 
-      ${this.db.createInsertString(goalPage)} 
+      ${this.db.createInsertString(_goalPage)} 
       RETURNING *
       `,
-          args: goalPage,
+          args: _goalPage,
         },
         {
           sql: `
@@ -48,19 +49,21 @@ export class TursoGoalPageRepo implements GoalPageRepository {
           args: _userGoal,
         },
       ])
-      .then((resArr) => resArr[0][0]);
+      .then((resArr) => this.normalizeResponse(resArr[0][0]));
 
     return goalPageEntity;
   }
 
   getPageById(id: string): Promise<GoalPageEntity> {
-    const goalPageEntity = this.db.queryFirst({
-      sql: `
+    const goalPageEntity = this.db
+      .queryFirst({
+        sql: `
       SELECT * FROM GoalPage
       WHERE id = ?  
       `,
-      args: [id],
-    });
+        args: [id],
+      })
+      .then(this.normalizeResponse);
 
     return goalPageEntity;
   }
@@ -83,19 +86,42 @@ export class TursoGoalPageRepo implements GoalPageRepository {
   updatePage(
     goalPage: Partial<GoalPageEntity> & GoalPageId
   ): Promise<GoalPageEntity> {
-    const pageWithoutID: Partial<GoalPageEntity> = { ...goalPage };
+    const pageWithoutID: any = {
+      ...goalPage,
+    };
     delete pageWithoutID.id;
 
-    const updatedPage = this.db.queryFirst({
-      sql: `
+    const modified = this.dateStringNormalizer(goalPage);
+
+    const updatedPage = this.db
+      .queryFirst({
+        sql: `
       UPDATE GoalPage 
       SET ${this.db.createUpdateString(pageWithoutID)}       
       WHERE id = :id 
       RETURNING * 
       `,
-      args: goalPage,
-    });
+        args: modified,
+      })
+      .then(this.normalizeResponse);
 
     return updatedPage;
+  }
+
+  private dateStringNormalizer(object: any) {
+    const modified = { ...object };
+    if (modified?.deadline && typeof modified.deadline !== null) {
+      const deadline: Date = modified.deadline;
+      modified.deadline = deadline.toISOString();
+    }
+    return modified;
+  }
+
+  private normalizeResponse(res: any) {
+    return {
+      ...res,
+      deadline:
+        typeof res.deadline === "string" ? new Date(res.deadline) : null,
+    };
   }
 }
