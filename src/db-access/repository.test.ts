@@ -53,21 +53,25 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
     });
   });
 
+  const pageToAdd: GoalPageEntity = {
+    id: uuidv4(),
+    user_id: user.id,
+    name: "test goal page",
+    deadline: null,
+    icon_url: null,
+    banner_url: null,
+  };
+
   test("GoalPage creation", async () => {
-    const pageToAdd = {
-      user_id: user.id,
-      name: "test goal page",
-      deadline: null,
-      icon_url: null,
-      banner_url: null,
-    };
-    const page = await tursoGoalPageRepo.addPage(
-      pageToAdd.user_id,
-      pageToAdd.name
-    );
-    const queried = await _db.page(pageToAdd.user_id, pageToAdd.name);
-    expect({ id: page.id, ...pageToAdd }).toBeDefined();
-    expect({ id: page.id, ...pageToAdd }).toStrictEqual(queried);
+    const page = await tursoGoalPageRepo.addPage(pageToAdd);
+    expect(page).toBeDefined();
+    expect(pageToAdd).toStrictEqual(page);
+  });
+
+  test("GoalPage query", async () => {
+    const page = await tursoGoalPageRepo.getPageById(pageToAdd.id);
+    expect(page).toBeDefined();
+    expect(page).toStrictEqual(pageToAdd);
   });
 };
 

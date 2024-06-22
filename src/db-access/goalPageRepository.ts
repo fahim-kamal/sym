@@ -2,33 +2,41 @@ import { GoalPageEntity } from "@/entities/goalPage";
 import { DatabaseAdapter } from "./databaseAdapter";
 
 export interface GoalPageRepository {
-  addPage(userId: string, name: string): Promise<GoalPageEntity>;
+  addPage(goalPage: GoalPageEntity): Promise<GoalPageEntity>;
   getPageById(id: string): Promise<GoalPageEntity>;
   deletePageById(id: string): void;
   updatePageById(id: string, newGoalPage: Partial<GoalPageEntity>): void;
 }
 
 export class TursoGoalPageRepo implements GoalPageRepository {
-  db: DatabaseAdapter;
+  private db: DatabaseAdapter;
 
   constructor(db: DatabaseAdapter) {
     this.db = db;
   }
 
-  addPage(userId: string, name: string): Promise<GoalPageEntity> {
+  addPage(goalPage: GoalPageEntity): Promise<GoalPageEntity> {
     const goalPageEntity = this.db.queryFirst({
       sql: `
-      INSERT INTO GoalPage (user_id, name) 
-      VALUES (?, ?)
+      INSERT INTO GoalPage 
+      ${this.db.createInsertString(goalPage)} 
       RETURNING *
       `,
-      args: [userId, name],
+      args: goalPage,
     });
 
     return goalPageEntity;
   }
-  getPageById(id: string): GoalPageEntity {
-    return;
+  getPageById(id: string): Promise<GoalPageEntity> {
+    const goalPageEntity = this.db.queryFirst({
+      sql: `
+      SELECT * FROM GoalPage
+      WHERE id = ?  
+      `,
+      args: [id],
+    });
+
+    return goalPageEntity;
   }
   deletePageById(id: string): void {
     return;

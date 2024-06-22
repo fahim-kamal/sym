@@ -16,4 +16,14 @@ export class DatabaseAdapter {
       return res.rows[0];
     }) as any;
   }
+
+  createInsertString(entity: object) {
+    const fields = Object.keys(entity);
+    const fieldsString = "(" + fields.join(", ") + ")";
+
+    const namedPlaceholders = fields.map((field) => ":" + field);
+    const namedPlaceholdersString = "(" + namedPlaceholders.join(", ") + ")";
+
+    return fieldsString + " VALUES " + namedPlaceholdersString;
+  }
 }
