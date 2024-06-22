@@ -17,6 +17,10 @@ export class DatabaseAdapter {
     }) as any;
   }
 
+  async queryMany(stmt: InStatement) {
+    return this.databaseClient.execute(stmt).then((res) => res.rows) as any;
+  }
+
   async batchAndReturnObjects(stmts: Array<InStatement>) {
     return this.databaseClient
       .batch(stmts)

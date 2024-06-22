@@ -78,6 +78,18 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
     expect(page).toStrictEqual(pageToAdd);
   });
 
+  test("GoalPage by ID", async () => {
+    const modifiedPage = { ...pageToAdd };
+    const goal_id = modifiedPage.id;
+    delete modifiedPage.id;
+    const expected = [
+      { ...modifiedPage, role: "owner", user_id: user.id, goal_id },
+    ];
+    const pages = await tursoGoalPageRepo.getPagesByUserId(user.id);
+    expect(pages).toBeDefined();
+    expect(pages).toStrictEqual(expected);
+  });
+
   test("GoalPage update", async () => {
     const pageToBeUpdated = {
       ...pageToAdd,
