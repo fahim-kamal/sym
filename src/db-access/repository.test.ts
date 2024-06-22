@@ -3,7 +3,7 @@ import { createClient } from "@libsql/client";
 import { DatabaseAdapter } from "./databaseAdapter";
 import { v4 as uuidv4 } from "uuid";
 import { TursoGoalPageRepo } from "./goalPageRepository";
-import { GoalPageEntity } from "@/entities/goalPage";
+import { GoalPageEntity, UserGoalEntity } from "@/entities/goalPage";
 
 const db = (client: DatabaseAdapter) => {
   return {
@@ -55,15 +55,19 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
 
   const pageToAdd: GoalPageEntity = {
     id: uuidv4(),
-    user_id: user.id,
     name: "test goal page",
     deadline: null,
     icon_url: null,
     banner_url: null,
   };
 
+  const userGoal: Omit<UserGoalEntity, "goal_id"> = {
+    user_id: user.id,
+    role: "owner",
+  };
+
   test("GoalPage creation", async () => {
-    const page = await tursoGoalPageRepo.addPage(pageToAdd);
+    const page = await tursoGoalPageRepo.addPage(userGoal, pageToAdd);
     expect(page).toBeDefined();
     expect(pageToAdd).toStrictEqual(page);
   });

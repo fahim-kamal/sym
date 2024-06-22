@@ -17,6 +17,12 @@ export class DatabaseAdapter {
     }) as any;
   }
 
+  async batchAndReturnObjects(stmts: Array<InStatement>) {
+    return this.databaseClient
+      .batch(stmts)
+      .then((resArr) => resArr.map((res) => res.rows as Array<any>));
+  }
+
   createInsertString(entity: object) {
     const fields = Object.keys(entity);
     const fieldsString = "(" + fields.join(", ") + ")";

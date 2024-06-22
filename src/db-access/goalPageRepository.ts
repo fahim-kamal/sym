@@ -1,8 +1,15 @@
-import { GoalPageEntity, GoalPageId } from "@/entities/goalPage";
+import {
+  GoalPageEntity,
+  GoalPageId,
+  UserGoalEntity,
+} from "@/entities/goalPage";
 import { DatabaseAdapter } from "./databaseAdapter";
 
 export interface GoalPageRepository {
-  addPage(goalPage: GoalPageEntity): Promise<GoalPageEntity>;
+  addPage(
+    userGoal: Omit<UserGoalEntity, "goal_id">,
+    goalPage: GoalPageEntity
+  ): Promise<GoalPageEntity>;
   getPageById(id: string): Promise<GoalPageEntity>;
   deletePageById(id: string): Promise<GoalPageId>;
   updatePage(
@@ -17,15 +24,31 @@ export class TursoGoalPageRepo implements GoalPageRepository {
     this.db = db;
   }
 
-  addPage(goalPage: GoalPageEntity): Promise<GoalPageEntity> {
-    const goalPageEntity = this.db.queryFirst({
-      sql: `
+  addPage(
+    userGoal: Omit<UserGoalEntity, "goal_id">,
+    goalPage: GoalPageEntity
+  ): Promise<GoalPageEntity> {
+    const _userGoal: UserGoalEntity = { ...userGoal, goal_id: goalPage.id };
+
+    const goalPageEntity = this.db
+      .batchAndReturnObjects([
+        {
+          sql: `
       INSERT INTO GoalPage 
       ${this.db.createInsertString(goalPage)} 
       RETURNING *
       `,
-      args: goalPage,
-    });
+          args: goalPage,
+        },
+        {
+          sql: `
+      INSERT INTO UserGoal
+      ${this.db.createInsertString(_userGoal)} 
+        `,
+          args: _userGoal,
+        },
+      ])
+      .then((resArr) => resArr[0][0]);
 
     return goalPageEntity;
   }
