@@ -1,33 +1,31 @@
-import { GoalPageEntity, GoalPageId } from "@/entities/goalPage";
-import { Client } from "@libsql/client/.";
+import { GoalPageEntity } from "@/entities/goalPage";
+import { DatabaseAdapter } from "./databaseAdapter";
 
-export abstract class GoalPageRepository {
-  abstract addPage(userId: string, name: string): Promise<GoalPageId>;
-  abstract getPageById(id: string): Promise<GoalPageEntity>;
-  abstract deletePageById(id: string): void;
-  abstract updatePageById(
-    id: string,
-    newGoalPage: Partial<GoalPageEntity>
-  ): void;
+export interface GoalPageRepository {
+  addPage(userId: string, name: string): Promise<GoalPageEntity>;
+  getPageById(id: string): Promise<GoalPageEntity>;
+  deletePageById(id: string): void;
+  updatePageById(id: string, newGoalPage: Partial<GoalPageEntity>): void;
 }
 
 export class TursoGoalPageRepo implements GoalPageRepository {
-  db: Client;
+  db: DatabaseAdapter;
 
-  constructor(tursoDB: Client) {
-    this.db = tursoDB;
+  constructor(db: DatabaseAdapter) {
+    this.db = db;
   }
 
-  addPage(userId: string, name: string): Promise<GoalPageId> {
-    const goalPageId = this.db.execute({
+  addPage(userId: string, name: string): Promise<GoalPageEntity> {
+    const goalPageEntity = this.db.queryFirst({
       sql: `
-      INSERT INTO GoalPage (id, name) 
+      INSERT INTO GoalPage (user_id, name) 
       VALUES (?, ?)
+      RETURNING *
       `,
       args: [userId, name],
-    }).then(());
+    });
 
-    return;
+    return goalPageEntity;
   }
   getPageById(id: string): GoalPageEntity {
     return;
