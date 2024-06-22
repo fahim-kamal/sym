@@ -1,11 +1,13 @@
-import { GoalPageEntity } from "@/entities/goalPage";
+import { GoalPageEntity, GoalPageId } from "@/entities/goalPage";
 import { DatabaseAdapter } from "./databaseAdapter";
 
 export interface GoalPageRepository {
   addPage(goalPage: GoalPageEntity): Promise<GoalPageEntity>;
   getPageById(id: string): Promise<GoalPageEntity>;
-  deletePageById(id: string): void;
-  updatePageById(id: string, newGoalPage: Partial<GoalPageEntity>): void;
+  deletePageById(id: string): Promise<GoalPageId>;
+  updatePage(
+    goalPage: Partial<GoalPageEntity> & GoalPageId
+  ): Promise<GoalPageEntity>;
 }
 
 export class TursoGoalPageRepo implements GoalPageRepository {
@@ -27,6 +29,7 @@ export class TursoGoalPageRepo implements GoalPageRepository {
 
     return goalPageEntity;
   }
+
   getPageById(id: string): Promise<GoalPageEntity> {
     const goalPageEntity = this.db.queryFirst({
       sql: `
@@ -38,10 +41,38 @@ export class TursoGoalPageRepo implements GoalPageRepository {
 
     return goalPageEntity;
   }
-  deletePageById(id: string): void {
-    return;
+
+  deletePageById(id: string): Promise<GoalPageId> {
+    const deletedId = this.db
+      .queryFirst({
+        sql: `
+      DELETE FROM GoalPage 
+      WHERE id = ? 
+      RETURNING id
+      `,
+        args: [id],
+      })
+      .then((res) => res.id);
+
+    return deletedId;
   }
-  updatePageById(id: string, newGoalPage: Partial<GoalPageEntity>): void {
-    return;
+
+  updatePage(
+    goalPage: Partial<GoalPageEntity> & GoalPageId
+  ): Promise<GoalPageEntity> {
+    const pageWithoutID: Partial<GoalPageEntity> = { ...goalPage };
+    delete pageWithoutID.id;
+
+    const updatedPage = this.db.queryFirst({
+      sql: `
+      UPDATE GoalPage 
+      SET ${this.db.createUpdateString(pageWithoutID)}       
+      WHERE id = :id 
+      RETURNING * 
+      `,
+      args: goalPage,
+    });
+
+    return updatedPage;
   }
 }

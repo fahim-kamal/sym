@@ -26,4 +26,12 @@ export class DatabaseAdapter {
 
     return fieldsString + " VALUES " + namedPlaceholdersString;
   }
+
+  createUpdateString(entity: object) {
+    const fields = Object.keys(entity);
+    const updateString = fields
+      .map((field) => field + " = " + ":" + field)
+      .join(", ");
+    return updateString;
+  }
 }

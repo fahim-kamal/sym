@@ -73,6 +73,19 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
     expect(page).toBeDefined();
     expect(page).toStrictEqual(pageToAdd);
   });
+
+  test("GoalPage update", async () => {
+    const pageToBeUpdated = { ...pageToAdd, icon_url: "example.imageurl.com" };
+    const updatedPage = await tursoGoalPageRepo.updatePage(pageToBeUpdated);
+    expect(updatedPage).toBeDefined();
+    expect(updatedPage).toStrictEqual(pageToBeUpdated);
+  });
+
+  test("GoalPage delete", async () => {
+    const deletedId = await tursoGoalPageRepo.deletePageById(pageToAdd.id);
+    expect(deletedId).toBeDefined();
+    expect(deletedId).toEqual(pageToAdd.id);
+  });
 };
 
 const client = new DatabaseAdapter(
