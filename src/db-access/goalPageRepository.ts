@@ -2,6 +2,7 @@ import {
   GoalPageEntity,
   GoalPageId,
   UserGoalEntity,
+  UserGoalPage,
 } from "@/entities/goalPage";
 import { DatabaseAdapter } from "./databaseAdapter";
 
@@ -11,7 +12,7 @@ export interface GoalPageRepository {
     goalPage: GoalPageEntity
   ): Promise<GoalPageEntity>;
   getPageById(id: string): Promise<GoalPageEntity>;
-  getPagesByUserId(userId: string): Promise<Array<UserGoalEntity>>;
+  getPagesByUserId(userId: string): Promise<Array<UserGoalPage>>;
   deletePageById(id: string): Promise<GoalPageId>;
   updatePage(
     goalPage: Partial<GoalPageEntity> & GoalPageId
@@ -69,7 +70,7 @@ export class TursoGoalPageRepo implements GoalPageRepository {
     return goalPageEntity;
   }
 
-  getPagesByUserId(userId: string): Promise<Array<UserGoalEntity>> {
+  getPagesByUserId(userId: string): Promise<Array<UserGoalPage>> {
     const pages = this.db
       .queryMany({
         sql: `

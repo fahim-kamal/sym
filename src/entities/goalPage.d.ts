@@ -15,3 +15,5 @@ export type UserGoalEntity = {
   goal_id: string;
   role: GoalRole;
 };
+
+export type UserGoalPage = Omit<GoalPageEntity, "id"> & UserGoalEntity;
