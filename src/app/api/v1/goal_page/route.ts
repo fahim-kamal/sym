@@ -1,17 +1,29 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 
 import { createPageCase } from "@/use-cases/createPageCase";
+import { getGoalPages } from "@/use-cases/getGoalPages";
+
 import { TursoGoalPageRepo } from "@/db-access/goalPageRepository";
 import { GoalPageEntity, UserGoalEntity } from "@/entities/goalPage";
 import { v4 as uuidv4 } from "uuid";
 
 import { NextErrorController } from "@/controllers/errorController";
 
-export async function GET(request: NextRequest) {
-  const res = { status: "route is not completed yet" };
-  return Response.json(res);
-}
+export const GET = auth(async function GET(request) {
+  const userId = request.auth?.user.id;
+
+  try {
+    const pages = await getGoalPages(
+      { goalPageRepo: new TursoGoalPageRepo() },
+      { userId, isAuthenticated: Boolean(request.auth) !== null }
+    );
+
+    return Response.json({ pages }, { status: 200 });
+  } catch (err) {
+    return NextErrorController.handleError(err);
+  }
+});
 
 export const POST = auth(async function POST(request) {
   const searchParams = request.nextUrl.searchParams;
