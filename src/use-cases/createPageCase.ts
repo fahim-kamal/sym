@@ -1,23 +1,42 @@
 import { GoalPageRepository } from "@/db-access/goalPageRepository";
-import { AuthenticationError, UserPageNumberExceeded } from "@/entities/errors";
+import {
+  AuthenticationError,
+  InvalidPageName,
+  UserPageNumberExceeded,
+} from "@/entities/errors";
 import {
   GoalPageEntity,
   UserGoalEntity,
   UserGoalPage,
 } from "@/entities/goalPage";
 
+/**
+ * Use case to create a goal page
+ * @param context
+ * @param isAuthenticated
+ * @param userGoal
+ * @param page
+ */
 export async function createPageCase(
   context: {
     goalPageRepo: GoalPageRepository;
   },
-  isAuthenticated: boolean,
-  userGoal: Omit<UserGoalEntity, "goal_id">,
-  page: GoalPageEntity
+  params: {
+    isAuthenticated: boolean;
+    userGoal: Omit<UserGoalEntity, "goal_id">;
+    page: GoalPageEntity;
+  }
 ) {
   const { goalPageRepo } = context;
+  const { isAuthenticated, userGoal, page } = params;
+  const maxNameLength = 125;
 
   if (!isAuthenticated) {
     throw new AuthenticationError();
+  }
+
+  if (page.name == "" || page.name.length >= maxNameLength) {
+    throw new InvalidPageName();
   }
 
   const pages: Array<UserGoalPage> = await goalPageRepo.getPagesByUserId(
