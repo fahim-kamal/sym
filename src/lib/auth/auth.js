@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import { TursoAdapter } from "./tursoAdapter";
 import { tursoClient } from "../turso/tursoClient";
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
+export const authOptions = {
   providers: [
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
@@ -12,4 +12,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   adapter: TursoAdapter(tursoClient),
-});
+};
+
+export const { handlers, signIn, signOut, auth } = NextAuth(authOptions);
