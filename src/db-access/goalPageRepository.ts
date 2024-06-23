@@ -5,6 +5,7 @@ import {
   UserGoalPage,
 } from "@/entities/goalPage";
 import { DatabaseAdapter } from "./databaseAdapter";
+import { tursoClient } from "@/lib/turso/tursoClient";
 
 export interface GoalPageRepository {
   addPage(
@@ -22,8 +23,8 @@ export interface GoalPageRepository {
 export class TursoGoalPageRepo implements GoalPageRepository {
   private db: DatabaseAdapter;
 
-  constructor(db: DatabaseAdapter) {
-    this.db = db;
+  constructor() {
+    this.db = new DatabaseAdapter(tursoClient);
   }
 
   addPage(
