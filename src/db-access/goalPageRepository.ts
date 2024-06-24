@@ -145,6 +145,8 @@ export class TursoGoalPageRepo implements GoalPageRepository {
   }
 
   private normalizeResponse(res: any) {
+    if (res === undefined) return;
+
     return {
       ...res,
       deadline:
