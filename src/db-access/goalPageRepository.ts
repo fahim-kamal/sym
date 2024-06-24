@@ -16,7 +16,10 @@ export interface GoalPageRepository {
   getPagesByUserId(userId: string): Promise<Array<UserGoalPage>>;
   deletePageById(id: string, userId: string): Promise<GoalPageId>;
   updatePage(
-    goalPage: Partial<GoalPageEntity> & GoalPageId
+    goalPage: Partial<Omit<GoalPageEntity, "user_id">> & {
+      user_id: string;
+      goal_id: string;
+    }
   ): Promise<GoalPageEntity>;
 }
 
@@ -116,12 +119,14 @@ export class TursoGoalPageRepo implements GoalPageRepository {
   }
 
   updatePage(
-    goalPage: Partial<GoalPageEntity> & GoalPageId
+    goalPage: Partial<Omit<GoalPageEntity, "user_id">> & {
+      user_id: string;
+      goal_id: string;
+    }
   ): Promise<GoalPageEntity> {
-    const pageWithoutID: any = {
-      ...goalPage,
-    };
-    delete pageWithoutID.id;
+    const updatePageParams = { ...goalPage };
+    delete updatePageParams.user_id;
+    delete updatePageParams.goal_id;
 
     const modified = this.dateStringNormalizer(goalPage);
 
@@ -129,8 +134,13 @@ export class TursoGoalPageRepo implements GoalPageRepository {
       .queryFirst({
         sql: `
       UPDATE GoalPage 
-      SET ${this.db.createUpdateString(pageWithoutID)}       
-      WHERE id = :id 
+      SET ${this.db.createUpdateString(updatePageParams)}       
+      WHERE id IN (
+        SELECT id FROM GoalPage 
+        INNER JOIN UserGoal
+        ON UserGoal.goal_id = GoalPage.id
+        WHERE UserGoal.user_id = :user_id AND UserGoal.goal_id = :goal_id AND role = "owner"
+      ) 
       RETURNING * 
       `,
         args: modified,
