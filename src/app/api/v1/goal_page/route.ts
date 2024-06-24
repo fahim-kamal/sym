@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth/auth";
 
 import { createPageCase } from "@/use-cases/createPageCase";
-import { getGoalPages } from "@/use-cases/getGoalPages";
+import { getGoalPages } from "@/use-cases/getGoalPagesCase";
 
 import { TursoGoalPageRepo } from "@/db-access/goalPageRepository";
 import { GoalPageEntity, UserGoalEntity } from "@/entities/goalPage";
