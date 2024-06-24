@@ -14,7 +14,7 @@ export interface GoalPageRepository {
   ): Promise<GoalPageEntity>;
   getPageById(id: string): Promise<GoalPageEntity>;
   getPagesByUserId(userId: string): Promise<Array<UserGoalPage>>;
-  deletePageById(id: string): Promise<GoalPageId>;
+  deletePageById(id: string, userId: string): Promise<GoalPageId>;
   updatePage(
     goalPage: Partial<GoalPageEntity> & GoalPageId
   ): Promise<GoalPageEntity>;
@@ -95,17 +95,22 @@ export class TursoGoalPageRepo implements GoalPageRepository {
     return pages;
   }
 
-  deletePageById(id: string): Promise<GoalPageId> {
+  deletePageById(id: string, userId: string): Promise<GoalPageId> {
     const deletedId = this.db
       .queryFirst({
         sql: `
-      DELETE FROM GoalPage 
-      WHERE id = ? 
+      DELETE FROM GoalPage
+      WHERE id IN (
+        SELECT id FROM GoalPage
+        INNER JOIN UserGoal
+          ON GoalPage.id = UserGoal.goal_id
+        WHERE goal_id = ? AND user_id = ? AND role = "owner"
+      )
       RETURNING id
       `,
-        args: [id],
+        args: [id, userId],
       })
-      .then((res) => res.id);
+      .then((res) => res?.id);
 
     return deletedId;
   }
