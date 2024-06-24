@@ -92,13 +92,23 @@ const runRepositoryTests = async () => {
 
   test("GoalPage update", async () => {
     const pageToBeUpdated = {
-      ...pageToAdd,
+      goal_id: pageToAdd.id,
+      user_id: user.id,
       deadline: new Date(),
       icon_url: "example.imageurl.com",
     };
+
+    const pageMatch = {
+      id: pageToAdd.id,
+      name: pageToAdd.name,
+      deadline: pageToBeUpdated.deadline,
+      icon_url: pageToBeUpdated.icon_url,
+      banner_url: pageToAdd.banner_url,
+    };
+
     const updatedPage = await tursoGoalPageRepo.updatePage(pageToBeUpdated);
     expect(updatedPage).toBeDefined();
-    expect(updatedPage).toStrictEqual(pageToBeUpdated);
+    expect(updatedPage).toStrictEqual(pageMatch);
   });
 
   test("GoalPage delete", async () => {
