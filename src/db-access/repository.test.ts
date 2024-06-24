@@ -1,9 +1,9 @@
 import { beforeAll, afterAll, expect, test } from "vitest";
-import { createClient } from "@libsql/client";
 import { DatabaseAdapter } from "./databaseAdapter";
 import { v4 as uuidv4 } from "uuid";
 import { TursoGoalPageRepo } from "./goalPageRepository";
 import { GoalPageEntity, UserGoalEntity } from "@/entities/goalPage";
+import { tursoClient } from "@/lib/turso/tursoClient";
 
 const db = (client: DatabaseAdapter) => {
   return {
@@ -19,9 +19,9 @@ const db = (client: DatabaseAdapter) => {
   };
 };
 
-const runRepositoryTests = async (client: DatabaseAdapter) => {
-  const tursoGoalPageRepo = new TursoGoalPageRepo(client);
-  const _db = db(client);
+const runRepositoryTests = async () => {
+  const tursoGoalPageRepo = new TursoGoalPageRepo();
+  const client = new DatabaseAdapter(tursoClient);
 
   const user = {
     id: uuidv4(),
@@ -102,17 +102,13 @@ const runRepositoryTests = async (client: DatabaseAdapter) => {
   });
 
   test("GoalPage delete", async () => {
-    const deletedId = await tursoGoalPageRepo.deletePageById(pageToAdd.id);
+    const deletedId = await tursoGoalPageRepo.deletePageById(
+      pageToAdd.id,
+      user.id
+    );
     expect(deletedId).toBeDefined();
     expect(deletedId).toEqual(pageToAdd.id);
   });
 };
 
-const client = new DatabaseAdapter(
-  createClient({
-    url: import.meta.env.VITE_NEXT_PUBLIC_TURSO_DATABASE_URL,
-    authToken: import.meta.env.VITE_NEXT_PUBLIC_TURSO_AUTH_TOKEN,
-  })
-);
-
-runRepositoryTests(client);
+runRepositoryTests();
