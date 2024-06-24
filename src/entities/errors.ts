@@ -12,7 +12,7 @@ export class AuthenticationError implements DomainError {
 
 export class UserPageNumberExceeded implements DomainError {
   constructor(maxNumberPages: number) {
-    this.message = `User cannot exceed ${maxNumberPages} for current plan.`;
+    this.message = `User cannot exceed ${maxNumberPages} pages for current plan.`;
   }
   name = "UserPageNumberExceeded";
   message: string;
