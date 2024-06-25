@@ -29,7 +29,7 @@ function FriendsSidebarSection() {
 
 export default function Sidebar() {
   return (
-    <div className="w-[250px] py-4 flex flex-col gap-4 bg-white flex-1">
+    <div className="basis-[250px] grow-0 shirnk-0 py-4 flex flex-col gap-4 bg-white">
       <GoalsSection goals={testGoals} />
       <FriendsSidebarSection />
     </div>

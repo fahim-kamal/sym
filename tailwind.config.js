@@ -17,6 +17,10 @@ module.exports = {
     require("daisyui"),
     plugin(function ({ addBase, theme }) {
       addBase({
+        h2: {
+          fontSize: 24,
+          fontWeight: "bold",
+        },
         h3: {
           fontSize: 18,
           fontWeight: "bold",
