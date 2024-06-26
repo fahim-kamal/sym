@@ -1,10 +1,15 @@
-function AvatarDefault() {
+function AvatarDefault({ variant = "small" }) {
+  const size = {
+    small: "w-8 h-8",
+    large: "w-10 h-10",
+  };
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
+      viewBox="2 2 20 20"
       fill="currentColor"
-      className="size-10"
+      className={size[variant]}
     >
       <path
         fillRule="evenodd"
@@ -15,17 +20,28 @@ function AvatarDefault() {
   );
 }
 
-export default function Avatar({ src }) {
+function AvatarImage({ src, variant = "small" }) {
+  const size = {
+    small: "size-8",
+    large: "size-10",
+  };
+
+  return (
+    <div className={size[variant] + " avatar"}>
+      <div className="rounded-full">
+        <img src={src} />
+      </div>
+    </div>
+  );
+}
+
+export default function Avatar({ src, variant }) {
   return (
     <>
-      {src !== null ? (
-        <div className="size-8 avatar">
-          <div className="rounded-full">
-            <img src={src} />
-          </div>
-        </div>
+      {src === undefined ? (
+        <AvatarDefault variant={variant} />
       ) : (
-        <AvatarDefault />
+        <AvatarImage src={src} variant={variant} />
       )}
     </>
   );

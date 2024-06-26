@@ -1,7 +1,10 @@
 import { Mukta } from "next/font/google";
 import "./globals.css";
 
-const mukta = Mukta({ weight: ["400", "500", "700"], subsets: ["latin"] });
+const mukta = Mukta({
+  weight: ["300", "400", "500", "700"],
+  subsets: ["latin"],
+});
 
 export const metadata = {
   title: "SYM",

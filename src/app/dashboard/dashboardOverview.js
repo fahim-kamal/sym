@@ -40,7 +40,7 @@ function PostCreator() {
 
 function DashboardOverviewContent() {
   return (
-    <div className="flex flex-col gap-y-6 ">
+    <div className="flex flex-col gap-y-6">
       <GoalSummary />
       <PostCreator />
     </div>
@@ -49,7 +49,7 @@ function DashboardOverviewContent() {
 
 export default function DashboardOverview() {
   return (
-    <div className="bg-white mx-5 my-4 rounded-xl min-w-[400px]">
+    <div className="bg-white mx-5 my-4 rounded-xl min-w-[400px] grow">
       <div className="m-4 flex flex-col gap-2">
         <h2>Your Dashboard</h2>
         <DashboardOverviewContent />
