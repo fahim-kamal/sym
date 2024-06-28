@@ -1,11 +1,13 @@
-import ImgIcon from "./imgIcon";
-import InboxIcon from "./inboxIcon";
-import HeartIcon from "./heartIcon";
-import CommentIcon from "./commentIcon";
-import ArrowRightIcon from "./arrowRightIcon";
+import ImgIcon from "./icons/imgIcon";
+import InboxIcon from "./icons/inboxIcon";
+import HeartIcon from "./icons/heartIcon";
+import CommentIcon from "./icons/commentIcon";
+import ArrowRightIcon from "./icons/arrowRightIcon";
+import DocumentChartIcon from "./icons/documentChartIcon";
+import TableIcon from "./icons/tableIcon";
 
-export function AddIconButton() {
-  return <IconButton icon={<ImgIcon />} text="Add Image" />;
+export function AddImageButton() {
+  return <IconButton icon={<ImgIcon />} text="Add Image" variant="snug" />;
 }
 
 export function LinkIconButton() {
@@ -43,6 +45,20 @@ export function GoToGoalButton() {
       variant="snug"
     />
   );
+}
+
+export function TrackMetricButton() {
+  return (
+    <IconButton
+      icon={<DocumentChartIcon />}
+      text="Track Metric"
+      variant="snug"
+    />
+  );
+}
+
+export function CreateTableButton() {
+  return <IconButton icon={<TableIcon />} text="Create Table" variant="snug" />;
 }
 
 export default function IconButton({

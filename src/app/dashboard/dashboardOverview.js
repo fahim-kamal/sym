@@ -1,4 +1,4 @@
-import { AddIconButton, LinkIconButton } from "@/components/iconButton";
+import { AddImageButton, LinkIconButton } from "@/components/iconButton";
 import { CreatePostButton } from "@/components/textButton";
 
 function GoalSummary() {
@@ -15,7 +15,7 @@ function PostCreatorButtonRow() {
   return (
     <div className="flex flex-row justify-between">
       <div className="flex flex-row gap-x-3">
-        <AddIconButton />
+        <AddImageButton />
         <LinkIconButton />
       </div>
       <CreatePostButton />

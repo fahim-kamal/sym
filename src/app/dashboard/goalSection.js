@@ -1,4 +1,4 @@
-import AddIcon from "@/components/addIcon";
+import AddIcon from "@/components/icons/addIcon";
 
 export const testGoals = [
   { name: "Working Out Everyday" },
