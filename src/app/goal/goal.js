@@ -2,6 +2,7 @@ import Calendar from "./calendar";
 import TextButton from "@/components/textButton";
 import Note from "./note";
 import ChatBox from "./chatBox";
+import Overflow from "@/components/overflow";
 
 function AddIconButton() {
   return <TextButton text="Add Icon" variant="solid" />;
@@ -36,7 +37,7 @@ export function GoalHeader() {
 
 export function GoalBody() {
   return (
-    <div className="flex flex-row gap-x-4">
+    <div className="h-full overflow-hidden flex gap-x-4">
       <div className="p-8 border rounded-xl">
         <Calendar />
       </div>
