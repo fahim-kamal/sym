@@ -5,6 +5,7 @@ import CommentIcon from "./icons/commentIcon";
 import ArrowRightIcon from "./icons/arrowRightIcon";
 import DocumentChartIcon from "./icons/documentChartIcon";
 import TableIcon from "./icons/tableIcon";
+import AddIcon from "./icons/addIcon";
 
 export function AddImageButton() {
   return <IconButton icon={<ImgIcon />} text="Add Image" variant="snug" />;
@@ -59,6 +60,17 @@ export function TrackMetricButton() {
 
 export function CreateTableButton() {
   return <IconButton icon={<TableIcon />} text="Create Table" variant="snug" />;
+}
+
+export function CreateTextButton() {
+  return (
+    <IconButton
+      icon={<AddIcon />}
+      text="Add Text"
+      variant="snug"
+      backgroundColor="white"
+    />
+  );
 }
 
 export default function IconButton({

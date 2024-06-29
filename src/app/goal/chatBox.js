@@ -74,7 +74,6 @@ function ChatMessage({ content, side = "right", userName, chatRef }) {
 
 function ChatMessageBox({ messages = [] }) {
   const scrollIntoView = (node) => {
-    console.log("HEYO");
     if (node) {
       node.scrollIntoView({ behavior: "smooth" });
     }

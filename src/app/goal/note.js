@@ -1,6 +1,15 @@
 "use client";
 
-import { AddImageButton, CreateTableButton } from "@/components/iconButton";
+import { TextareaAutosize } from "@mui/base";
+import { v4 as uuidv4 } from "uuid";
+
+import { useState, useRef } from "react";
+
+import {
+  AddImageButton,
+  CreateTableButton,
+  CreateTextButton,
+} from "@/components/iconButton";
 import ChevronLeft from "@/components/icons/chevronLeft";
 import ChevronRight from "@/components/icons/chevronRight";
 import { TrackMetricButton } from "@/components/iconButton";
@@ -30,15 +39,60 @@ function NoteButtonBar() {
   );
 }
 
+function AddNotePrompt({ ref }) {
+  const initialPrompt = "Write something here";
+  const [content, setContent] = useState("");
+
+  return (
+    <TextareaAutosize
+      className="outline-none w-full resize-none scroll-auto h-full"
+      value={content}
+      placeholder={initialPrompt}
+      onChange={(event) => {
+        setContent(event.target.value);
+      }}
+      onBlur={() => {
+        const trimmed = content.trim();
+        const isEmpty = trimmed.length === 0;
+
+        if (isEmpty) {
+          setContent("");
+        }
+      }}
+    />
+  );
+}
+
+function NoteCanvas() {
+  const [elements, setElements] = useState({});
+
+  const addElement = (type) => {
+    setElements((prev) => {
+      return { ...prev, [uuidv4]: { type: type, content: "" } };
+    });
+  };
+
+  return (
+    <div className="h-full overflow-scroll px-8">
+      <AddNotePrompt />
+      <div className="pt-4">
+        <img src="https://roseodengo.com/wp-content/uploads/2017/02/online-community.jpg" />
+      </div>
+    </div>
+  );
+}
+
 export default function Note() {
   return (
-    <div className="p-8 border rounded-xl flex-1">
-      <div className="flex flex-col justify-between ">
-        <div>
+    <div className="py-8 border rounded-xl flex-1">
+      <div className="flex flex-col justify-between gap-y-4 h-full">
+        <div className="px-8">
           <NoteHeader />
-          <div>Document daily progress here</div>
         </div>
-        <NoteButtonBar />
+        <NoteCanvas />
+        <div className="px-8">
+          <NoteButtonBar />
+        </div>
       </div>
     </div>
   );
