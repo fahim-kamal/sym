@@ -108,7 +108,7 @@ function GoalIcon({ onIconSelect }) {
             <div className="text-6xl">{icon}</div>
           </div>
           {showEmojiMenu && (
-            <div className="absolute" ref={scrollTo}>
+            <div className="absolute z-20" ref={scrollTo}>
               <EmojiMenu
                 changeEmoji={changeEmojiHandler}
                 onBlur={() => {
