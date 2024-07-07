@@ -18,7 +18,7 @@ import ChevronRight from "@/components/icons/chevronRight";
 import { TrackMetricButton } from "@/components/iconButton";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 
-import { Editor } from "../test/page";
+import { Editor } from "./editor";
 
 function NoteHeader() {
   const today = new Date().toDateString();
@@ -42,30 +42,6 @@ function NoteButtonBar() {
       <TrackMetricButton />
       <CreateTableButton />
     </div>
-  );
-}
-
-function AddNotePrompt({ ref }) {
-  const initialPrompt = "Write something here";
-  const [content, setContent] = useState("");
-
-  return (
-    <TextareaAutosize
-      className="outline-none w-full resize-none scroll-auto h-full"
-      value={content}
-      placeholder={initialPrompt}
-      onChange={(event) => {
-        setContent(event.target.value);
-      }}
-      onBlur={() => {
-        const trimmed = content.trim();
-        const isEmpty = trimmed.length === 0;
-
-        if (isEmpty) {
-          setContent("");
-        }
-      }}
-    />
   );
 }
 

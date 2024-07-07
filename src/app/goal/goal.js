@@ -5,7 +5,6 @@ import Calendar from "./calendar";
 import TextButton from "@/components/textButton";
 import Note from "./note";
 import ChatBox from "./chatBox";
-import Overflow from "@/components/overflow";
 import EmojiMenu from "../dashboard/emojiMenu";
 import GoalBackground from "./goalBackground";
 
