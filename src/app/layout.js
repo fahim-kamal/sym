@@ -4,6 +4,7 @@ import "./globals.css";
 const mukta = Mukta({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
+  variable: "--font-mukta",
 });
 
 export const metadata = {

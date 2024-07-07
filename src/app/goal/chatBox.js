@@ -89,7 +89,7 @@ function ChatMessageBox({ messages = [] }) {
               key={id}
               userName={user}
               side={side}
-              chatRef={scrollIntoView}
+              // chatRef={scrollIntoView}
             />
           );
         }
