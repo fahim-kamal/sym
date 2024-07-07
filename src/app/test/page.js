@@ -3,6 +3,7 @@
 import { useState, useRef, Profiler, useEffect } from "react";
 import { flushSync } from "react-dom";
 
+import Stack from "@/components/stack";
 import { useRefList } from "@/hooks/useRefList";
 import { useControlledInput } from "@/hooks/useControlledInput";
 
@@ -12,14 +13,6 @@ import { useBlocks } from "@/hooks/useBlock";
 import { BlockLine } from "../goal/note";
 
 import { v4 as uuidv4 } from "uuid";
-
-function Stack({ children }) {
-  return (
-    <div className="w-full h-full grid grid-rows-1 grid-cols-1 *:row-start-1 *:col-start-1">
-      {children}
-    </div>
-  );
-}
 
 function ConnectedInputField({
   placeholder,
