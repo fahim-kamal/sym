@@ -4,10 +4,12 @@ import Stack from "@/components/stack";
 import TextareaAutosize from "react-textarea-autosize";
 import DragIndicator from "@mui/icons-material/DragIndicator";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { flushSync } from "react-dom";
 import { useBlocks } from "@/hooks/useBlock";
 import { useRefList } from "@/hooks/useRefList";
+
+import { EditorContext, EditorProvider } from "@/context/editorContext";
 
 import { v4 as uuidv4 } from "uuid";
 
@@ -82,18 +84,17 @@ function ConnectedInputField({
   );
 }
 
-export function BlockLine({
+function BlockLine({
   content = "",
   renderInputElement,
   blockId,
   previousBlockId,
   blockLineNumber,
   changeBlock,
-  setInputRef,
-  getRef,
-  setFocusByBlockId,
   getBlockByIndex,
 }) {
+  const { setRef, getRefById, changeFocus } = useContext(EditorContext);
+
   const [isVisible, setIsVisible] = useState(
     content != "" || blockLineNumber == 1
   );
@@ -132,7 +133,7 @@ export function BlockLine({
       });
 
       // change focus to the newly created block
-      setFocusByBlockId({ id: createdBlockId, offset: 0 });
+      changeFocus(createdBlockId, 0);
 
       // turn visibility off for current block
       if (content == "") {
@@ -164,10 +165,7 @@ export function BlockLine({
         action: "edit",
       });
 
-      setFocusByBlockId({
-        id: previousBlockId,
-        offset: prevBlockContent.length ?? 0,
-      });
+      changeFocus(previousBlockId, prevBlockContent ?? 0);
 
       event.preventDefault();
     }
@@ -179,8 +177,8 @@ export function BlockLine({
     content: content,
     onChange: handleInputChange,
     onKeyDown: handleKeyboardEvent,
-    setInputRef: setInputRef,
-    getRef: getRef,
+    setInputRef: setRef,
+    getRef: getRefById,
   });
 
   return (
@@ -207,26 +205,14 @@ export function BlockLine({
   );
 }
 
-export function Editor() {
-  const { blocks, editBlocks, setBlocks, getBlockByIndex } = useBlocks();
-  const { setRef, getRefById, getRefMap } = useRefList();
-
-  const [focus, setFocus] = useState(null);
-
-  useEffect(() => {
-    const focusedIdRef = getRefById(focus?.id);
-
-    if (focus?.id != null && focusedIdRef != undefined) {
-      focusedIdRef.focus();
-      focusedIdRef.setSelectionRange(focus.offset, focus.offset);
-    }
-  }, [focus]);
-
-  const [disableInput, setDisableInput] = useState(false);
-
-  const onTextClick = (state) => {
-    flushSync(() => setDisableInput(state));
-  };
+function EditorCanvas({
+  children,
+  blocks,
+  editBlocks,
+  setBlocks,
+  onTextClick,
+}) {
+  const { getRefById } = useContext(EditorContext);
 
   // probably should extract to a hooks
   const getAssociatedId = (node) => {
@@ -363,29 +349,49 @@ export function Editor() {
       tabIndex={1}
       onKeyDown={handleSelectionOverwrite}
     >
-      {blocks.map(({ id, content }, index, blocksArr) => (
-        <BlockLine
-          key={id}
-          content={content}
-          renderInputElement={({ ...props }) => (
-            <ConnectedInputField
-              {...props}
-              placeholder="Add block"
-              className="outline-none"
-              disableInput={disableInput}
-              onTextClick={onTextClick}
-            />
-          )}
-          blockId={id}
-          previousBlockId={blocksArr[index - 1]?.id}
-          blockLineNumber={index}
-          changeBlock={editBlocks}
-          setInputRef={setRef}
-          getRef={getRefById}
-          setFocusByBlockId={setFocus}
-          getBlockByIndex={getBlockByIndex}
-        />
-      ))}
+      {children}
     </div>
+  );
+}
+
+export function Editor() {
+  const { blocks, editBlocks, setBlocks, getBlockByIndex } = useBlocks();
+
+  const [disableInput, setDisableInput] = useState(false);
+
+  const onTextClick = (state) => {
+    flushSync(() => setDisableInput(state));
+  };
+
+  return (
+    <EditorProvider>
+      <EditorCanvas
+        blocks={blocks}
+        setBlocks={setBlocks}
+        editBlocks={editBlocks}
+        onTextClick={onTextClick}
+      >
+        {blocks.map(({ id, content }, index, blocksArr) => (
+          <BlockLine
+            key={id}
+            content={content}
+            renderInputElement={({ ...props }) => (
+              <ConnectedInputField
+                {...props}
+                placeholder="Add block"
+                className="outline-none"
+                disableInput={disableInput}
+                onTextClick={onTextClick}
+              />
+            )}
+            blockId={id}
+            previousBlockId={blocksArr[index - 1]?.id}
+            blockLineNumber={index}
+            changeBlock={editBlocks}
+            getBlockByIndex={getBlockByIndex}
+          />
+        ))}
+      </EditorCanvas>
+    </EditorProvider>
   );
 }
