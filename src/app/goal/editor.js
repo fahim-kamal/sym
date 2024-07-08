@@ -25,7 +25,7 @@ function ConnectedInputField({
   setInputRef,
   getRef,
 }) {
-  const onDivClick = () => {
+  const handleTextClick = () => {
     onTextClick(false);
 
     const selection = window.getSelection();
@@ -65,7 +65,7 @@ function ConnectedInputField({
             event.preventDefault();
           }
         }}
-        onClick={onDivClick}
+        onClick={handleTextClick}
         ref={(node) => {
           setInputRef(node, blockId + "-overlay");
 
@@ -343,11 +343,37 @@ function EditorCanvas({
     event.preventDefault();
   };
 
+  const shouldHandleMultilineEvent = (event) => {
+    const whitespaceKeys = ["Enter", " ", "Backspace"];
+
+    const isWhitespacePressed = whitespaceKeys.some((val) => val == event.key);
+
+    const modifiers = ["Meta", "Control"];
+
+    const isAnyModifierPressed = modifiers.some((val) =>
+      event.getModifierState(val)
+    );
+
+    // if modifier is pressed we should let default handling
+    // for instance: copy and paste
+
+    return (
+      (event.key.length == 1 || isWhitespacePressed) && !isAnyModifierPressed
+    );
+  };
+
+  const handleMultilineKeyboardInput = (event) => {
+    console.log(event.key);
+    if (!shouldHandleMultilineEvent(event)) return;
+
+    handleSelectionOverwrite(event);
+  };
+
   return (
     <div
       className="flex flex-col justify-center outline-none"
       tabIndex={1}
-      onKeyDown={handleSelectionOverwrite}
+      onKeyDown={handleMultilineKeyboardInput}
     >
       {children}
     </div>
