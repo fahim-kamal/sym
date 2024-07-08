@@ -363,7 +363,6 @@ function EditorCanvas({
   };
 
   const handleMultilineKeyboardInput = (event) => {
-    console.log(event.key);
     if (!shouldHandleMultilineEvent(event)) return;
 
     handleSelectionOverwrite(event);
