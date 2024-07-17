@@ -85,7 +85,7 @@ function GoalButtonRow() {
   );
 }
 
-function GoalIcon({ onIconSelect }) {
+export function GoalIcon({ onIconSelect }) {
   const { isIconEnabled, icon, changeIcon, showEmojiMenu, setShowEmojiMenu } =
     useContext(HeaderContext);
 
