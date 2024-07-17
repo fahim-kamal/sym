@@ -1,44 +1,77 @@
 "use client";
 
-import { useContext } from "react";
-import { HeaderContext } from "@/context/headerContext";
+import { useRef, useState } from "react";
+import { useImgDrag } from "@/hooks/useImgDrag";
 
-import Image from "next/image";
+function GoalImageBackground({ src, yPos }) {
+  const ref = useRef(null);
 
-export function GoalImageBackground({ src, children }) {
+  const setDisplay = (visibility) => {
+    if (ref.current) {
+      ref.current.style.visibility = visibility;
+    }
+  };
+
   return (
-    <div className="w-full h-full">
-      <img
-        className="w-full h-full object-cover"
-        src="https://images.unsplash.com/photo-1548506923-99f6e89852fe?q=80&w=2948&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-      />
-      {children}
+    <img
+      ref={ref}
+      onLoad={() => setDisplay("visible")}
+      onError={() => setDisplay("hidden")}
+      draggable="false"
+      src={src}
+      style={{
+        objectPosition: `center ${yPos}%`,
+      }}
+      className={`w-full h-[200px] object-cover`}
+    />
+  );
+}
+
+function GoalGradientBackground({ style, yPos }) {
+  // ${isRepositionEnabled ? "hover:cursor-move" : ""}
+  return (
+    <div className={`w-full h-full relative overflow-clip`}>
+      <div
+        style={{ top: `-${yPos}%` }}
+        className={`w-full h-[400px] absolute bg-gradient-to-b ${style}`}
+      ></div>
     </div>
   );
 }
 
-export function GoalGradientBackground({ styles, children }) {
-  return (
-    <div className="w-full h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ">
-      {children}
-    </div>
-  );
-}
+export default function GoalBackground({
+  backgroundData,
+  isRepositionEnabled,
+}) {
+  const { type, content } = backgroundData;
 
-export default function GoalBackground({ type = "image", children }) {
-  const { showBanner } = useContext(HeaderContext);
-
-  if (!showBanner) {
-    return <></>;
-  }
+  const [canMove, setCanMove] = useState(false);
+  const { yPos, handleDrag, handleDragStart } = useImgDrag();
 
   return (
-    <>
+    <div
+      className="relative w-full h-full"
+      onMouseDown={(event) => {
+        if (isRepositionEnabled) {
+          setCanMove(true);
+          handleDragStart(event);
+        }
+      }}
+      onMouseMove={(event) => {
+        if (canMove) {
+          handleDrag(event);
+        }
+      }}
+      onMouseUp={() => setCanMove(false)}
+      onMouseLeave={() => setCanMove(false)}
+    >
       {type == "image" ? (
-        <GoalImageBackground>{children}</GoalImageBackground>
+        <GoalImageBackground src={content} yPos={yPos} />
+      ) : type == "gradient" ? (
+        <GoalGradientBackground style={content} yPos={yPos} />
       ) : (
-        <GoalGradientBackground>{children}</GoalGradientBackground>
+        <></>
       )}
-    </>
+    </div>
   );
 }
