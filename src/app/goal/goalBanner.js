@@ -30,24 +30,25 @@ function LinkBannerSection({ submitURL }) {
   );
 }
 
-function GradientBannerSection({ submitGradient }) {
-  const variants = [
-    "from-rose-500 via-pink-500 to-red-500",
-    "from-blue-500 via-cyan-500 to-teal-500",
-    "from-green-200 via-emerald-400 to-teal-600",
-  ];
+export const gradientVariants = {
+  peachy: "from-rose-500 via-pink-500 to-red-500",
+  iceberg: "from-blue-500 via-cyan-500 to-teal-500",
+  tropicalRainforest: "from-green-500 via-emerald-500 to-teal-500",
+};
 
+function GradientBannerSection({ submitGradient }) {
   return (
     <div>
       <div className="flex flex-col gap-y-2">
-        {variants.map((style, index) => {
+        {Object.keys(gradientVariants).map((varKey, index) => {
+          const style = gradientVariants[varKey];
           const className = `w-full h-[90px] rounded-lg bg-gradient-to-r hover:cursor-pointer ${style}`;
 
           return (
             <div
               className={className}
               key={index}
-              onClick={() => submitGradient(style)}
+              onClick={() => submitGradient(varKey)}
             />
           );
         })}

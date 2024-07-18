@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useImgDrag } from "@/hooks/useImgDrag";
+import { gradientVariants } from "./goalBanner";
 
 function GoalImageBackground({ src, yPos }) {
   const ref = useRef(null);
@@ -68,7 +69,7 @@ export default function GoalBackground({
       {type == "image" ? (
         <GoalImageBackground src={content} yPos={yPos} />
       ) : type == "gradient" ? (
-        <GoalGradientBackground style={content} yPos={yPos} />
+        <GoalGradientBackground style={gradientVariants[content]} yPos={yPos} />
       ) : (
         <></>
       )}
