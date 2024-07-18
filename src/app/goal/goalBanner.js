@@ -148,7 +148,8 @@ function BannerReposition({ isEnabled, onClick }) {
 }
 
 export default function GoalBanner() {
-  const [background, setBackground] = useState({ type: null, content: null });
+  const defaultBackground = { type: "gradient", content: "peachy" };
+  const [background, setBackground] = useState(defaultBackground);
 
   const setBackgroundData = ({ type, content }) =>
     setBackground({ type, content });
