@@ -7,7 +7,8 @@ import { useToggle } from "@/hooks/useToggle";
 import TextButton from "@/components/textButton";
 import GoalBackground from "./goalBackground";
 import TabGroup from "@/components/tabGroup";
-import { HeaderProvider } from "@/context/headerContext";
+import { useHeaderContext } from "@/context/headerContext";
+import { GoalIconProvider } from "@/context/goalIconContext";
 import { GoalIcon } from "./goal";
 
 function LinkBannerSection({ submitURL }) {
@@ -164,56 +165,64 @@ export default function GoalBanner() {
     toggle: onButtonClick,
   } = useToggle(false);
 
+  const { showBanner } = useHeaderContext();
+
   return (
     <div className="w-full h-[200px] relative">
-      <div
-        className={
-          "w-full h-full" +
-          ` ${showBannerTooltips ? "[&>div]:block" : "[&>div]:hover:block"}` +
-          ` ${isRepositionEnabled ? "cursor-move" : ""}`
-        }
-      >
-        <div className="absolute z-10 hidden top-4 right-4">
-          <div className="flex gap-x-2">
-            <TabGroup after={toggleShowTooltips}>
-              <BannerReposition
-                isEnabled={isRepositionEnabled}
-                onClick={handleBannerReposition}
-              />
-              <ChangeBannerBackground
-                isOpen={isOpen}
-                onClick={onButtonClick}
-                setURL={(url) =>
-                  setBackgroundData({ type: "image", content: url })
-                }
-                setGradient={(style) =>
-                  setBackgroundData({ type: "gradient", content: style })
-                }
-                handleClose={() => {
-                  setIsOpen(false);
-                  toggleShowTooltips();
-                }}
-              />
-            </TabGroup>
-          </div>
-        </div>
+      {showBanner && (
         <div
           className={
-            "absolute z-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2" +
-            ` ${isRepositionEnabled ? "" : "!hidden"}`
+            "w-full h-full" +
+            ` ${showBannerTooltips ? "[&>div]:block" : "[&>div]:hover:block"}` +
+            ` ${isRepositionEnabled ? "cursor-move" : ""}`
           }
         >
-          <GoalRepositionToolTip />
+          <div className="absolute z-10 hidden top-4 right-4">
+            <div className="flex gap-x-2">
+              <TabGroup after={toggleShowTooltips}>
+                <BannerReposition
+                  isEnabled={isRepositionEnabled}
+                  onClick={() => {
+                    if (background.content != null) {
+                      handleBannerReposition();
+                    }
+                  }}
+                />
+                <ChangeBannerBackground
+                  isOpen={isOpen}
+                  onClick={onButtonClick}
+                  setURL={(url) =>
+                    setBackgroundData({ type: "image", content: url })
+                  }
+                  setGradient={(style) =>
+                    setBackgroundData({ type: "gradient", content: style })
+                  }
+                  handleClose={() => {
+                    setIsOpen(false);
+                    toggleShowTooltips();
+                  }}
+                />
+              </TabGroup>
+            </div>
+          </div>
+          <div
+            className={
+              "absolute z-10 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2" +
+              ` ${isRepositionEnabled ? "" : "!hidden"}`
+            }
+          >
+            <GoalRepositionToolTip />
+          </div>
+          <GoalBackground
+            backgroundData={background}
+            isRepositionEnabled={isRepositionEnabled}
+          />
         </div>
-        <GoalBackground
-          backgroundData={background}
-          isRepositionEnabled={isRepositionEnabled}
-        />
-      </div>
+      )}
       <div className="absolute z-10 -bottom-12 mx-8" id="goalIcon">
-        <HeaderProvider>
+        <GoalIconProvider>
           <GoalIcon onIconSelect={() => {}} />
-        </HeaderProvider>
+        </GoalIconProvider>
       </div>
     </div>
   );

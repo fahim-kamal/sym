@@ -6,26 +6,33 @@ import TextButton from "@/components/textButton";
 import Note from "./note";
 import ChatBox from "./chatBox";
 import EmojiMenu from "../dashboard/emojiMenu";
-import GoalBackground from "./goalBackground";
 
 import { HeaderContext, HeaderProvider } from "@/context/headerContext";
+import GoalBanner from "./goalBanner";
+import {
+  GoalIconProvider,
+  useGoalIconContext,
+} from "@/context/goalIconContext";
 
 function AddRemoveButton({ isEnabled, onButtonClick, text }) {
-  const add = "Add " + text;
-  const remove = "Remove " + text;
+  const add = "Add ";
 
   return (
-    <TextButton
-      variant="outline"
-      onClick={onButtonClick}
-      text={isEnabled ? remove : add}
-    />
+    <>
+      {!isEnabled && (
+        <TextButton
+          variant="outline"
+          onClick={onButtonClick}
+          text={add + text}
+        />
+      )}
+    </>
   );
 }
 
 function IconSelectionButton() {
-  const { isIconEnabled, toggleIsIconEnabled, setShowEmojiMenu } =
-    useContext(HeaderContext);
+  const { setShowEmojiMenu } = useGoalIconContext();
+  const { isIconEnabled, toggleIsIconEnabled } = useContext(HeaderContext);
 
   const onIconButtonClick = () => {
     toggleIsIconEnabled();
@@ -78,7 +85,9 @@ function AddDeadline() {
 function GoalButtonRow() {
   return (
     <div className="flex flex-row gap-x-2">
-      <IconSelectionButton />
+      <GoalIconProvider>
+        <IconSelectionButton />
+      </GoalIconProvider>
       <BannerButton />
       <DeadlineButton />
     </div>
@@ -86,8 +95,9 @@ function GoalButtonRow() {
 }
 
 export function GoalIcon({ onIconSelect }) {
-  const { isIconEnabled, icon, changeIcon, showEmojiMenu, setShowEmojiMenu } =
-    useContext(HeaderContext);
+  const { showEmojiMenu, setShowEmojiMenu, icon, changeIcon } =
+    useGoalIconContext();
+  const { isIconEnabled } = useContext(HeaderContext);
 
   const ref = useRef(null);
 
@@ -140,36 +150,28 @@ function GoalTitle() {
   );
 }
 
-export function GoalHeader({ header }) {
+export function GoalHeader() {
   const [showButtomRow, setShowButtonRow] = useState(false);
   const closeButtonRow = () => setShowButtonRow(false);
 
   return (
-    <div
-      className="flex flex-col justify-end"
-      onMouseEnter={() => {
-        setShowButtonRow(true);
-      }}
-      onMouseLeave={closeButtonRow}
-    >
-      <HeaderProvider>
-        <div className="h-36 relative">
-          <GoalBackground />
-          {/* <div className="absolute right-0 bottom-0">
-            <GoalBackgroundMenu />
-          </div> */}
-          <div className="size-24 absolute -bottom-12 mx-8">
-            <GoalIcon onIconSelect={closeButtonRow} />
-          </div>
-        </div>
-        <div className="mt-10 py-8 px-4 flex flex-col gap-y-2 ">
+    <HeaderProvider>
+      <div className="flex flex-col justify-end">
+        <GoalBanner />
+        <div
+          onMouseEnter={() => {
+            setShowButtonRow(true);
+          }}
+          onMouseLeave={closeButtonRow}
+          className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
+        >
           <GoalTitle />
           <div className={showButtomRow ? "visible" : "invisible"}>
             <GoalButtonRow closeButtonRow={closeButtonRow} />
           </div>
         </div>
-      </HeaderProvider>
-    </div>
+      </div>
+    </HeaderProvider>
   );
 }
 
