@@ -36,9 +36,7 @@ function IconSelectionButton() {
 
   const onIconButtonClick = () => {
     toggleIsIconEnabled();
-    if (!isIconEnabled) {
-      setShowEmojiMenu(true);
-    }
+    setShowEmojiMenu(true);
   };
 
   return (
@@ -85,9 +83,7 @@ function AddDeadline() {
 function GoalButtonRow() {
   return (
     <div className="flex flex-row gap-x-2">
-      <GoalIconProvider>
-        <IconSelectionButton />
-      </GoalIconProvider>
+      <IconSelectionButton />
       <BannerButton />
       <DeadlineButton />
     </div>
@@ -156,21 +152,23 @@ export function GoalHeader() {
 
   return (
     <HeaderProvider>
-      <div className="flex flex-col justify-end">
-        <GoalBanner />
-        <div
-          onMouseEnter={() => {
-            setShowButtonRow(true);
-          }}
-          onMouseLeave={closeButtonRow}
-          className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
-        >
-          <GoalTitle />
-          <div className={showButtomRow ? "visible" : "invisible"}>
-            <GoalButtonRow closeButtonRow={closeButtonRow} />
+      <GoalIconProvider>
+        <div className="flex flex-col justify-end">
+          <GoalBanner />
+          <div
+            onMouseEnter={() => {
+              setShowButtonRow(true);
+            }}
+            onMouseLeave={closeButtonRow}
+            className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
+          >
+            <GoalTitle />
+            <div className={showButtomRow ? "visible" : "invisible"}>
+              <GoalButtonRow closeButtonRow={closeButtonRow} />
+            </div>
           </div>
         </div>
-      </div>
+      </GoalIconProvider>
     </HeaderProvider>
   );
 }

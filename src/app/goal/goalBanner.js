@@ -8,7 +8,6 @@ import TextButton from "@/components/textButton";
 import GoalBackground from "./goalBackground";
 import TabGroup from "@/components/tabGroup";
 import { useHeaderContext } from "@/context/headerContext";
-import { GoalIconProvider } from "@/context/goalIconContext";
 import { GoalIcon } from "./goal";
 
 function LinkBannerSection({ submitURL }) {
@@ -220,9 +219,7 @@ export default function GoalBanner() {
         </div>
       )}
       <div className="absolute z-10 -bottom-12 mx-8" id="goalIcon">
-        <GoalIconProvider>
-          <GoalIcon onIconSelect={() => {}} />
-        </GoalIconProvider>
+        <GoalIcon onIconSelect={() => {}} />
       </div>
     </div>
   );
