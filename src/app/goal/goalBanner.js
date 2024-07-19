@@ -9,6 +9,7 @@ import GoalBackground from "./goalBackground";
 import TabGroup from "@/components/tabGroup";
 import { useHeaderContext } from "@/context/headerContext";
 import { GoalIcon } from "./goal";
+import { useBackgroundContext } from "@/context/goalBackgroundContext";
 
 function LinkBannerSection({ submitURL }) {
   const { input, onInputChange } = useControlledInput();
@@ -56,8 +57,7 @@ function GradientBannerSection({ submitGradient }) {
     </div>
   );
 }
-
-function ChangeBannerMenu({ submitURL, submitGradient }) {
+function ChangeBannerMenu({ submitURL, submitGradient, deleteBackground }) {
   const [selectedSection, setSelectedSection] = useState(0);
 
   const selectedStyles = "font-bold";
@@ -68,16 +68,21 @@ function ChangeBannerMenu({ submitURL, submitGradient }) {
   return (
     <div className="flex flex-col gap-y-2 min-w-[400px] p-4 border bg-white">
       <h3>Backgrounds</h3>
-      <div className="flex gap-x-2 hover:[&>div]:cursor-pointer">
-        {tabs.map((tab, index) => (
-          <div
-            className={applyStyles(index)}
-            onClick={() => setSelectedSection(index)}
-            key={index}
-          >
-            {tab}
-          </div>
-        ))}
+      <div className="flex justify-between items-center">
+        <div className="flex gap-x-2 hover:[&>div]:cursor-pointer">
+          {tabs.map((tab, index) => (
+            <div
+              className={applyStyles(index)}
+              onClick={() => setSelectedSection(index)}
+              key={index}
+            >
+              {tab}
+            </div>
+          ))}
+        </div>
+        <div className="hover:cursor-pointer" onClick={deleteBackground}>
+          Remove Banner
+        </div>
       </div>
       {selectedSection == 0 ? (
         <GradientBannerSection submitGradient={submitGradient} />
@@ -99,16 +104,18 @@ function ChangeBannerBackground({
   resetSelectedTab,
   setURL,
   setGradient,
+  removeBanner,
   handleClose,
 }) {
-  const submit = (cb, content) => {
+  const submit = (cb, ...params) => {
     resetSelectedTab();
-    cb(content);
+    cb(...params);
     handleClose();
   };
 
   const submitURL = (input) => submit(setURL, input);
   const submitGradient = (style) => submit(setGradient, style);
+  const deleteBackground = () => submit(removeBanner);
 
   return (
     <div className="relative">
@@ -118,6 +125,7 @@ function ChangeBannerBackground({
           <ChangeBannerMenu
             submitURL={submitURL}
             submitGradient={submitGradient}
+            deleteBackground={deleteBackground}
           />
         </div>
       )}
@@ -148,11 +156,7 @@ function BannerReposition({ isEnabled, onClick }) {
 }
 
 export default function GoalBanner() {
-  const defaultBackground = { type: "gradient", content: "peachy" };
-  const [background, setBackground] = useState(defaultBackground);
-
-  const setBackgroundData = ({ type, content }) =>
-    setBackground({ type, content });
+  const { backgroundData, dispatchBackgroundData } = useBackgroundContext();
 
   const { value: showBannerTooltips, toggle: toggleShowTooltips } =
     useToggle(false);
@@ -166,7 +170,7 @@ export default function GoalBanner() {
     toggle: onButtonClick,
   } = useToggle(false);
 
-  const { showBanner } = useHeaderContext();
+  const { showBanner, setShowBanner } = useHeaderContext();
 
   return (
     <div className="w-full h-[200px] relative">
@@ -184,7 +188,7 @@ export default function GoalBanner() {
                 <BannerReposition
                   isEnabled={isRepositionEnabled}
                   onClick={() => {
-                    if (background.content != null) {
+                    if (backgroundData.content != null) {
                       handleBannerReposition();
                     }
                   }}
@@ -193,11 +197,23 @@ export default function GoalBanner() {
                   isOpen={isOpen}
                   onClick={onButtonClick}
                   setURL={(url) =>
-                    setBackgroundData({ type: "image", content: url })
+                    dispatchBackgroundData({
+                      type: "change",
+                      bg_type: "image",
+                      bg_content: url,
+                    })
                   }
                   setGradient={(style) =>
-                    setBackgroundData({ type: "gradient", content: style })
+                    dispatchBackgroundData({
+                      type: "change",
+                      bg_type: "gradient",
+                      bg_content: style,
+                    })
                   }
+                  removeBanner={() => {
+                    setShowBanner(false);
+                    dispatchBackgroundData({ type: "delete" });
+                  }}
                   handleClose={() => {
                     setIsOpen(false);
                     toggleShowTooltips();
@@ -215,12 +231,12 @@ export default function GoalBanner() {
             <GoalRepositionToolTip />
           </div>
           <GoalBackground
-            backgroundData={background}
+            backgroundData={backgroundData}
             isRepositionEnabled={isRepositionEnabled}
           />
         </div>
       )}
-      <div className="absolute z-10 -bottom-12 mx-8" id="goalIcon">
+      <div className="absolute z-10 -bottom-12 mx-4" id="goalIcon">
         <GoalIcon onIconSelect={() => {}} />
       </div>
     </div>

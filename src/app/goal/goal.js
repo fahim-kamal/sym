@@ -13,6 +13,9 @@ import {
   GoalIconProvider,
   useGoalIconContext,
 } from "@/context/goalIconContext";
+import BackgroundProvider, {
+  useBackgroundContext,
+} from "@/context/goalBackgroundContext";
 
 function AddRemoveButton({ isEnabled, onButtonClick, text }) {
   const add = "Add ";
@@ -50,8 +53,12 @@ function IconSelectionButton() {
 
 function BannerButton() {
   const { showBanner, setShowBanner } = useContext(HeaderContext);
+  const { dispatchBackgroundData } = useBackgroundContext();
 
-  const onBannerButtonClick = () => setShowBanner((prev) => !prev);
+  const onBannerButtonClick = () => {
+    dispatchBackgroundData({ type: "add" });
+    setShowBanner((prev) => !prev);
+  };
 
   return (
     <AddRemoveButton
@@ -153,21 +160,23 @@ export function GoalHeader() {
   return (
     <HeaderProvider>
       <GoalIconProvider>
-        <div className="flex flex-col justify-end">
-          <GoalBanner />
-          <div
-            onMouseEnter={() => {
-              setShowButtonRow(true);
-            }}
-            onMouseLeave={closeButtonRow}
-            className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
-          >
-            <GoalTitle />
-            <div className={showButtomRow ? "visible" : "invisible"}>
-              <GoalButtonRow closeButtonRow={closeButtonRow} />
+        <BackgroundProvider>
+          <div className="flex flex-col justify-end">
+            <GoalBanner />
+            <div
+              onMouseEnter={() => {
+                setShowButtonRow(true);
+              }}
+              onMouseLeave={closeButtonRow}
+              className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
+            >
+              <GoalTitle />
+              <div className={showButtomRow ? "visible" : "invisible"}>
+                <GoalButtonRow closeButtonRow={closeButtonRow} />
+              </div>
             </div>
           </div>
-        </div>
+        </BackgroundProvider>
       </GoalIconProvider>
     </HeaderProvider>
   );
