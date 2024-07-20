@@ -3,46 +3,64 @@ import {
   pusherAuthenticateEndpoint,
   pusherAuthorizeEndpoint,
 } from "@/lib/pusher";
-import { useContext, useEffect } from "react";
-import { PusherContext } from "@/context/pusherContext";
+import { useState, useRef, useEffect } from "react";
 
-export const usePusher = () => {
-  const { pusherClient, setPusherClient } = useContext(PusherContext);
+const options = {
+  cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+  enabledTransports: ["ws"],
+  authEndpoint: pusherAuthorizeEndpoint,
+  authTransport: "ajax",
+  userAuthentication: {
+    endpoint: pusherAuthenticateEndpoint,
+  },
+  forceTLS: true,
+};
+
+const testingChannelId = "testing";
+
+export const usePusher = (channelId = testingChannelId) => {
+  const [messages, setMessages] = useState([]);
+  const pusherClientRef = useRef(null);
+  const [isConnectionLoading, setIsConnectionLoading] = useState(true);
+
+  const channelName = `private-${channelId}`;
+  const messageEventName = "client-message-event";
+
+  const updateMessageList = (message) => {
+    setMessages((prev) => [...prev, message]);
+  };
+
+  const sendMessage = (message) => {
+    const channel = pusherClientRef.current.get(channelName);
+    channel.trigger(messageEventName, message);
+  };
+
+  const submitHandler = (message) => {
+    updateMessageList(message);
+    sendMessage(message);
+  };
 
   useEffect(() => {
-    if (pusherClient === undefined) {
-      const pusherInstance = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, {
-        cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
-        enabledTransports: ["ws"],
-        authEndpoint: pusherAuthorizeEndpoint,
-        authTransport: "ajax",
-        userAuthentication: {
-          endpoint: pusherAuthenticateEndpoint,
-        },
-        forceTLS: true,
+    if (pusherClientRef.current === null) {
+      const map = new Map();
+
+      const pusher = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY, options);
+      const channel = pusher.subscribe(channelName);
+
+      channel.bind("pusher:subscription_succeeded", () => {
+        setIsConnectionLoading(false);
       });
 
-      const clientCallback = () => {
-        setPusherClient(pusherInstance);
-      };
+      channel.bind(messageEventName, (data) => {
+        updateMessageList(data);
+      });
 
-      const disconnectCallback = () => {
-        setPusherClient(undefined);
-      };
+      map.set("pusher", pusher);
+      map.set(channelName, channel);
 
-      pusherInstance.connection.bind("connected", clientCallback);
-      pusherInstance.connection.bind("disconnected", disconnectCallback);
+      pusherClientRef.current = map;
     }
-
-    return () => {
-      if (pusherClient !== undefined) {
-        pusherClient.disconnect();
-        pusherClient.connection.unbind("connected", clientCallback);
-        pusherClient.connection.unbind("disconnected", disconnectCallback);
-        setPusherClient(undefined);
-      }
-    };
   }, []);
 
-  return { pusherClient };
+  return { isLoading: isConnectionLoading, submitHandler, messages };
 };
