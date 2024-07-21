@@ -10,21 +10,21 @@ const sampleChatMessages = [
     id: 12313,
     user: "Fahim Kamal",
     content: "This is a test.",
-    date: new Date(),
+    date: new Date(2024, 6, 4),
     side: "left",
   },
   {
     id: 85722,
     user: "Billy Bob",
     content: "Heyoo, whats up with this goal?",
-    date: new Date(),
+    date: new Date(2024, 6, 15),
     side: "left",
   },
   {
     id: 34284,
     user: "Billy Bob",
     content: "Ya diggitye.",
-    date: new Date(),
+    date: new Date(2024, 6, 18),
     side: "left",
   },
   {
@@ -32,14 +32,14 @@ const sampleChatMessages = [
     user: "Billy Bob",
     content:
       "I want it to overflow so I can test the oveflow functionality which which will be useful in the design aspect of the chatbox page.",
-    date: new Date(),
+    date: new Date(2024, 6, 18),
     side: "left",
   },
   {
     id: 2348242,
     user: "Shelly Seashells",
     content: "Hopefully ",
-    date: new Date(),
+    date: new Date(2024, 6, 20),
     side: "left",
   },
   {
@@ -56,21 +56,82 @@ function ChatTitle() {
   return <h3>#Untitled Chat</h3>;
 }
 
-function ChatMessage({ content, side = "right", userName, chatRef }) {
+function ChatMessage({
+  content,
+  date,
+  showUsername = true,
+  side = "right",
+  userName,
+  chatRef,
+}) {
   const variant = {
     left: "justify-start",
     right: "justify-end",
   };
 
   return (
-    <div className={"flex w-full " + variant[side]} ref={chatRef}>
-      <div className={"flex flex-col max-w-[75%]"}>
-        <div className="font-medium text-sm">{userName}</div>
-        <div className={"bg-sym_bg_gray px-2 py-1 rounded-md"}>{content}</div>
+    <div className="flex flex-col gap-y-2" ref={chatRef}>
+      {date !== undefined && (
+        <div
+          className="self-center font-medium text-sm mt-4"
+          suppressHydrationWarning
+        >
+          {date}
+        </div>
+      )}
+      <div className={"flex w-full " + variant[side]}>
+        <div className={"flex flex-col max-w-[75%]"}>
+          {showUsername && (
+            <div className="font-medium text-sm">{userName}</div>
+          )}
+          <div className={"bg-sym_bg_gray px-2 py-1 rounded-md"}>{content}</div>
+        </div>
       </div>
     </div>
   );
 }
+
+const formatChatMessageDate = (date) => {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  const weekAgo = new Date();
+  weekAgo.setDate(today.getDate() - 7);
+
+  const messageDateString = date.toDateString();
+
+  const isToday = messageDateString === today.toDateString();
+  const isYesterday = messageDateString === yesterday.toDateString();
+  const isWithinLastWeek = date.getTime() >= weekAgo.getTime();
+
+  // if date is today or yesterday say so
+  if (isToday) {
+    return "Today at " + date.toLocaleString([], { timeStyle: "short" });
+  } else if (isYesterday) {
+    return "Yesterday at " + date.toLocaleString([], { timeStyle: "short" });
+  }
+  // if date is in the last week use day of week
+  else if (isWithinLastWeek) {
+    const dateString = date.toLocaleString([], {
+      weekday: "long",
+      hour: "numeric",
+      minute: "numeric",
+    });
+
+    const split = dateString.split(" ");
+
+    return split[0] + " at " + split.splice(1).join(" ");
+  }
+  // other wise use full name
+
+  const time = date.toLocaleString([], {
+    dateStyle: "long",
+    timeStyle: "short",
+  });
+
+  return time;
+};
 
 function ChatMessageBox({ messages = [] }) {
   const scrollIntoView = (node) => {
@@ -80,22 +141,27 @@ function ChatMessageBox({ messages = [] }) {
   };
 
   return (
-    <div className="flex flex-col gap-y-2 pr-4 w-[325px]">
-      {messages.map(({ content, user, id, side }, idx) => {
-        if (idx + 1 === messages.length) {
-          return (
-            <ChatMessage
-              content={content}
-              key={id}
-              userName={user}
-              side={side}
-              // chatRef={scrollIntoView}
-            />
-          );
-        }
+    <div className="flex flex-col gap-y-2 pr-4">
+      {messages.map(({ content, date, user, id, side }, idx, array) => {
+        const prev = array?.[idx - 1];
+        const prevDate = prev?.date;
+
+        const isSameDay =
+          prevDate && prevDate.toDateString() === date.toDateString();
+
+        const prevName = prev?.user;
+        const showUsername = prevName !== user || !isSameDay;
 
         return (
-          <ChatMessage content={content} key={id} userName={user} side={side} />
+          <ChatMessage
+            date={isSameDay ? undefined : formatChatMessageDate(date)}
+            content={content}
+            showUsername={showUsername}
+            key={id}
+            userName={user}
+            side={side}
+            chatRef={idx + 1 === messages.length ? scrollIntoView : undefined}
+          />
         );
       })}
     </div>
@@ -129,7 +195,7 @@ function ChatInput({ addMessage }) {
       }}
       rows={3}
       placeholder="Send message"
-      className="bg-sym_bg_gray px-2 py-1 rounded-md w-full resize-none"
+      className="bg-sym_bg_gray px-2 py-1 rounded-md w-full resize-none outline-none"
     />
   );
 }
@@ -151,13 +217,14 @@ export default function ChatBox() {
       ];
     });
   };
-
+  // grid grid-rows-[1rem 1fr 1rem] gap-y-2
   return (
-    <div className="border rounded-xl py-8 overflow-hidden grid grid-rows-[1rem 1fr 1rem] gap-y-2">
+    <div className="border rounded-xl py-8 overflow-hidden flex flex-col max-w-[400px] h-[500px]">
       <div className="px-8">
         <ChatTitle />
       </div>
-      <div className="overflow-scroll pl-8 ">
+      {/* flex flex-col justify-end */}
+      <div className="overflow-scroll pl-8 flex-auto grid grid-cols-1 items-end">
         <ChatMessageBox messages={messages} />
       </div>
       <div className="px-8">
