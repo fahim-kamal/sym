@@ -136,7 +136,7 @@ const formatChatMessageDate = (date) => {
 function ChatMessageBox({ messages = [] }) {
   const scrollIntoView = (node) => {
     if (node) {
-      node.scrollIntoView({ behavior: "smooth" });
+      node.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   };
 
@@ -220,11 +220,12 @@ export default function ChatBox() {
   // grid grid-rows-[1rem 1fr 1rem] gap-y-2
   return (
     <div className="border rounded-xl py-8 overflow-hidden flex flex-col max-w-[400px] h-[500px]">
-      <div className="px-8">
+      <div className="px-8 py-2">
         <ChatTitle />
       </div>
       {/* flex flex-col justify-end */}
-      <div className="overflow-scroll pl-8 flex-auto grid grid-cols-1 items-end">
+      {/*  grid grid-cols-1 items-end */}
+      <div className="overflow-scroll pl-8 flex-auto flex flex-col-reverse">
         <ChatMessageBox messages={messages} />
       </div>
       <div className="px-8">
