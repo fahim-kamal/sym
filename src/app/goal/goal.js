@@ -97,10 +97,20 @@ function GoalButtonRow() {
   );
 }
 
+function RemoveIcon({ onClick }) {
+  return (
+    <div className="p-2 border rounded-xl border-solid border-gray hover:cursor-pointer">
+      <div onClick={onClick} className="text-sm">
+        Remove Icon
+      </div>
+    </div>
+  );
+}
+
 export function GoalIcon({ onIconSelect }) {
   const { showEmojiMenu, setShowEmojiMenu, icon, changeIcon } =
     useGoalIconContext();
-  const { isIconEnabled } = useContext(HeaderContext);
+  const { isIconEnabled, toggleIsIconEnabled } = useContext(HeaderContext);
 
   const ref = useRef(null);
 
@@ -128,6 +138,14 @@ export function GoalIcon({ onIconSelect }) {
                   setShowEmojiMenu(false);
                 }}
               />
+              <div className="top-0 right-0 absolute translate-x-full">
+                <RemoveIcon
+                  onClick={() => {
+                    // setShowEmojiMenu(false);
+                    toggleIsIconEnabled();
+                  }}
+                />
+              </div>
             </div>
           )}
         </div>
