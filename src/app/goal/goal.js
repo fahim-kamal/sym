@@ -5,7 +5,7 @@ import Calendar from "./calendar";
 import TextButton from "@/components/textButton";
 import Note from "./note";
 import ChatBox from "./chatBox";
-import EmojiMenu from "../dashboard/emojiMenu";
+import EmojiMenu from "./emojiMenu";
 
 import { HeaderContext, HeaderProvider } from "@/context/headerContext";
 import GoalBanner from "./goalBanner";
