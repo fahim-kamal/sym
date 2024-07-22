@@ -133,13 +133,7 @@ const formatChatMessageDate = (date) => {
   return time;
 };
 
-function ChatMessageBox({ messages = [] }) {
-  const scrollIntoView = (node) => {
-    if (node) {
-      node.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  };
-
+function ChatMessageBox({ lastMessageRef, messages = [] }) {
   return (
     <div className="flex flex-col gap-y-2 pr-4">
       {messages.map(({ content, date, user, id, side }, idx, array) => {
@@ -160,7 +154,7 @@ function ChatMessageBox({ messages = [] }) {
             key={id}
             userName={user}
             side={side}
-            chatRef={idx + 1 === messages.length ? scrollIntoView : undefined}
+            chatRef={idx + 1 === messages.length ? lastMessageRef : undefined}
           />
         );
       })}
@@ -168,7 +162,7 @@ function ChatMessageBox({ messages = [] }) {
   );
 }
 
-function ChatInput({ addMessage }) {
+function ChatInput({ addMessage, onTextSelect }) {
   const [message, setMessage] = useState("");
 
   return (
@@ -177,6 +171,7 @@ function ChatInput({ addMessage }) {
       onChange={(event) => {
         setMessage(event.target.value);
       }}
+      onSelect={onTextSelect}
       onKeyDown={(event) => {
         const trimmed = event.target.value.trim();
         const onlyWhiteSpace = trimmed.length === 0;
@@ -217,19 +212,28 @@ export default function ChatBox() {
       ];
     });
   };
-  // grid grid-rows-[1rem 1fr 1rem] gap-y-2
+
+  const lastMessageRef = useRef(null);
+
+  const inputSelectHandler = () => {
+    if (lastMessageRef.current !== null) {
+      lastMessageRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  };
+
   return (
     <div className="border rounded-xl py-8 overflow-hidden flex flex-col max-w-[400px] h-[500px]">
       <div className="px-8 py-2">
         <ChatTitle />
       </div>
-      {/* flex flex-col justify-end */}
-      {/*  grid grid-cols-1 items-end */}
       <div className="overflow-scroll pl-8 flex-auto flex flex-col-reverse">
-        <ChatMessageBox messages={messages} />
+        <ChatMessageBox lastMessageRef={lastMessageRef} messages={messages} />
       </div>
       <div className="px-8">
-        <ChatInput addMessage={addMessage} />
+        <ChatInput addMessage={addMessage} onTextSelect={inputSelectHandler} />
       </div>
     </div>
   );
