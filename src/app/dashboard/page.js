@@ -17,7 +17,7 @@ function DashboardContent() {
 
 export default function Dashboard() {
   return (
-    <div className="bg-sym_bg_gray flex flex-col h-dvh">
+    <div className="bg-sym_bg_gray flex flex-col h-dvh" id="dashboard-root">
       <SymHeader />
       <DashboardContent />
       <ReactQueryProvider>{/* <GoalList /> */}</ReactQueryProvider>
