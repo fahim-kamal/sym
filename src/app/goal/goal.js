@@ -160,7 +160,7 @@ function GoalTitle() {
   return (
     <input
       ref={ref}
-      className="outline-none text-2xl font-bold overflow-hidden h-full"
+      className="outline-none text-2xl font-bold overflow-hidden h-full bg-transparent"
       placeholder="Untitled Goal"
       onKeyDown={(event) => {
         if (event.key === "Enter") {
@@ -186,7 +186,7 @@ export function GoalHeader() {
                 setShowButtonRow(true);
               }}
               onMouseLeave={closeButtonRow}
-              className="mt-10 py-8 px-4 flex flex-col gap-y-2 "
+              className="mt-10 py-8 px-20 flex flex-col gap-y-2 "
             >
               <GoalTitle />
               <div className={showButtomRow ? "visible" : "invisible"}>
@@ -202,7 +202,7 @@ export function GoalHeader() {
 
 export function GoalBody() {
   return (
-    <div className="h-full overflow-hidden flex gap-x-4 mx-4">
+    <div className="h-full overflow-hidden flex gap-x-4 px-20">
       <Note />
       {/* <ChatBox />
       <div className="p-8 border rounded-xl">

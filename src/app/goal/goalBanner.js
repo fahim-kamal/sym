@@ -236,7 +236,7 @@ export default function GoalBanner() {
           />
         </div>
       )}
-      <div className="absolute z-10 -bottom-12 mx-4" id="goalIcon">
+      <div className="absolute z-10 -bottom-12 mx-20" id="goalIcon">
         <GoalIcon onIconSelect={() => {}} />
       </div>
     </div>
