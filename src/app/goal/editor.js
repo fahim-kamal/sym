@@ -52,7 +52,7 @@ function ConnectedInputField({
         onKeyDown={onKeyDown}
         ref={(node) => setInputRef(node, blockId)}
         className={
-          "text-base caret-black outline-none resize-none selection:bg-cyan-400 placeholder:text-transparent focus:placeholder:text-gray-400 " +
+          "text-base caret-black outline-none resize-none selection:bg-cyan-400 placeholder:text-transparent focus:placeholder:text-gray-400 bg-transparent " +
           (disableInput ? "invisible" : "text-transparent")
         }
       />
@@ -197,7 +197,7 @@ function BlockLine({
       <DragIndicator
         id="dragIcon"
         className={
-          "text-[gray] opacity-0 hover:cursor-grab absolute -left-[2rem]"
+          "text-black opacity-0 hover:cursor-grab absolute -left-[2rem]"
         }
       />
       {InputElement}
