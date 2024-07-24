@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-export const useBlocks = (initialBlocks = [{ id: uuidv4(), content: "" }]) => {
+const initialNumberOfBlocks = 10;
+const defaultInitialBlocks = new Array(initialNumberOfBlocks)
+  .fill(undefined)
+  .map(() => {
+    return { id: uuidv4(), content: "" };
+  });
+
+export const useBlocks = (initialBlocks = defaultInitialBlocks) => {
   const [blocks, setBlocks] = useState(initialBlocks);
 
   const editBlocks = ({ id, content, itemPos, action = "edit" }) => {
