@@ -202,12 +202,12 @@ export function GoalHeader() {
 
 export function GoalBody() {
   return (
-    <div className="h-full overflow-hidden flex gap-x-4">
+    <div className="h-full overflow-hidden flex gap-x-4 mx-4">
       <Note />
-      <ChatBox />
+      {/* <ChatBox />
       <div className="p-8 border rounded-xl">
         <Calendar />
-      </div>
+      </div> */}
     </div>
   );
 }
