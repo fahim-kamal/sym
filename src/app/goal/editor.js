@@ -165,7 +165,7 @@ function BlockLine({
         action: "edit",
       });
 
-      changeFocus(previousBlockId, prevBlockContent ?? 0);
+      changeFocus(previousBlockId, prevBlockContent.length ?? 0);
 
       event.preventDefault();
     }
