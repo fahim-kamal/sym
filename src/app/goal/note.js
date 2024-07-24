@@ -25,12 +25,12 @@ function NoteHeader() {
   const split = today.split(" ", 3).join(" ");
 
   return (
-    <div className="flex flex-row justify-between">
+    <div className="flex flex-row justify-between pb-4 border-b-2">
       <h3>{split}</h3>
-      <div className="flex flex-row">
+      {/* <div className="flex flex-row">
         <ChevronLeft />
         <ChevronRight />
-      </div>
+      </div> */}
     </div>
   );
 }
@@ -47,15 +47,13 @@ function NoteButtonBar() {
 
 export default function Note() {
   return (
-    <div className="p-8 border rounded-xl flex-1">
+    <div className="flex-1">
       <div className="flex flex-col justify-between gap-y-4">
         <div className="flex flex-col gap-y-4">
           <NoteHeader />
           <Editor />
         </div>
-        <div className="">
-          <NoteButtonBar />
-        </div>
+        <div className="">{/* <NoteButtonBar /> */}</div>
       </div>
     </div>
   );
