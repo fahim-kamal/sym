@@ -52,13 +52,13 @@ function ConnectedInputField({
         onKeyDown={onKeyDown}
         ref={(node) => setInputRef(node, blockId)}
         className={
-          "text-base caret-black outline-none resize-none selection:bg-cyan-400 " +
+          "text-base caret-black outline-none resize-none selection:bg-cyan-400 placeholder:text-transparent focus:placeholder:text-gray-400 " +
           (disableInput ? "invisible" : "text-transparent")
         }
       />
       <div
         className={
-          "text-base hover:cursor-text break-words whitespace-pre-wrap select-text z-10 "
+          "text-base hover:cursor-text break-words whitespace-pre-wrap select-text "
         }
         onMouseDown={(event) => {
           if (event.detail > 2 || (event.detail > 1 && content == "")) {
@@ -370,7 +370,7 @@ function EditorCanvas({
 
   return (
     <div
-      className="flex flex-col justify-center outline-none"
+      className="flex flex-col gap-y-2 justify-center outline-none"
       tabIndex={1}
       onKeyDown={handleMultilineKeyboardInput}
     >
