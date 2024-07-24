@@ -47,13 +47,13 @@ function NoteButtonBar() {
 
 export default function Note() {
   return (
-    <div className="py-8 border rounded-xl flex-1">
+    <div className="p-8 border rounded-xl flex-1">
       <div className="flex flex-col justify-between gap-y-4">
-        <div className="px-10">
+        <div className="flex flex-col gap-y-4">
           <NoteHeader />
           <Editor />
         </div>
-        <div className="px-8">
+        <div className="">
           <NoteButtonBar />
         </div>
       </div>
