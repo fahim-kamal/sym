@@ -4,7 +4,6 @@ import ClientPortal from "@/components/clientPortal";
 import AddIcon from "@/components/icons/addIcon";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { createPortal } from "react-dom";
 import { useToggle } from "@/hooks/useToggle";
 
 import TextButton from "@/components/textButton";
@@ -39,7 +38,7 @@ function LightboxMenu({ children, showLightbox, closeLightbox }) {
   return showLightbox ? (
     <>
       <div
-        className="absolute w-screen h-screen bg-black/10"
+        className="absolute top-0 left-0 w-screen h-screen bg-black/20"
         onClick={closeLightbox}
       />
       {children}
@@ -97,16 +96,14 @@ function AddGoalButton() {
       >
         <AddIcon />
       </div>
-      <ClientPortal selector={"#dashboard-root"}>
-        <LightboxMenu showLightbox={value} closeLightbox={handleClose}>
-          <div className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-            <AddButtonForm
-              handleSubmit={handleSubmit}
-              handleClose={handleClose}
-            />
-          </div>
-        </LightboxMenu>
-      </ClientPortal>
+      <LightboxMenu showLightbox={value} closeLightbox={handleClose}>
+        <div className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
+          <AddButtonForm
+            handleSubmit={handleSubmit}
+            handleClose={handleClose}
+          />
+        </div>
+      </LightboxMenu>
     </div>
   );
 }
