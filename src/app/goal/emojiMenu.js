@@ -9,7 +9,7 @@ export default function EmojiMenu({ changeEmoji, onBlur }) {
       <Picker
         data={data}
         previewPosition="none"
-        searchPosition="none"
+        // searchPosition="none"
         theme="light"
         onEmojiSelect={changeEmoji}
         onClickOutside={onBlur}
