@@ -1,13 +1,12 @@
 "use client";
 
-import ClientPortal from "@/components/clientPortal";
 import AddIcon from "@/components/icons/addIcon";
 import CloseIcon from "@mui/icons-material/Close";
 
-import { useToggle } from "@/hooks/useToggle";
-
+import { LightboxMenu } from "@/components/lightboxMenu";
 import TextButton from "@/components/textButton";
 
+import { useToggle } from "@/hooks/useToggle";
 import { useRouter } from "next/navigation";
 
 export const testGoals = [
@@ -31,20 +30,6 @@ function GoalsList({ goalsList }) {
         <GoalItem name={name} key={name} />
       ))}
     </div>
-  );
-}
-
-function LightboxMenu({ children, showLightbox, closeLightbox }) {
-  return showLightbox ? (
-    <>
-      <div
-        className="absolute top-0 left-0 w-screen h-screen bg-black/20"
-        onClick={closeLightbox}
-      />
-      {children}
-    </>
-  ) : (
-    <></>
   );
 }
 
@@ -97,12 +82,7 @@ function AddGoalButton() {
         <AddIcon />
       </div>
       <LightboxMenu showLightbox={value} closeLightbox={handleClose}>
-        <div className="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2">
-          <AddButtonForm
-            handleSubmit={handleSubmit}
-            handleClose={handleClose}
-          />
-        </div>
+        <AddButtonForm handleSubmit={handleSubmit} handleClose={handleClose} />
       </LightboxMenu>
     </div>
   );
