@@ -1,5 +1,7 @@
 const plugin = require("tailwindcss/plugin");
 
+const colors = require("tailwindcss/colors");
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -13,6 +15,8 @@ module.exports = {
         sym_blue: "#47E9FF",
         sym_green: "#47FFA7",
         sym_bg_gray: "#F5F5F5",
+        "hover-1": colors.gray[50],
+        "hover-2": colors.gray[200],
       },
     },
   },

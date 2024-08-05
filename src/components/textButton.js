@@ -4,17 +4,18 @@ export default function TextButton({
   width = "w-max",
   onClick,
 }) {
-  const variantStyles = {
-    outline: "border border-black text-sm",
-    solid: "bg-black text-white text-sm",
-  };
-
   return (
     <div
       onClick={onClick}
       className={
         "px-2 py-1 rounded flex justify-center gap-x-4 items-center hover:cursor-pointer " +
-        variantStyles[variant] +
+        ` ${
+          variant == "outline"
+            ? "border border-black text-sm"
+            : variant == "solid"
+            ? "bg-black text-white hover:bg-zinc-700"
+            : ""
+        }` +
         ` ${width}`
       }
     >

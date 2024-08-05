@@ -2,23 +2,27 @@
 
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Add } from "@mui/icons-material";
+import { Add, Clear, Edit, Done } from "@mui/icons-material";
 
-import { Checkbox, TextField } from "@mui/material";
+import { Checkbox } from "@mui/material";
 import { useToggle } from "@/hooks/useToggle";
 
-import { useReducer, useState } from "react";
+import { useState } from "react";
 
-import { v4 as uuidv4 } from "uuid";
+import { useTaskContext } from "@/context/taskContext";
+import { useControlledInput } from "@/hooks/useControlledInput";
+import Menu from "../menu";
+import TextInput from "../textInput";
+import TaskListBar from "./taskListBar";
+import TaskDialog from "./taskDialog";
 
-import { LightboxMenu } from "../lightboxMenu";
-import TextButton from "../textButton";
-
-function CircleCheckbox() {
+function CircleCheckbox({ checked, onClick }) {
   const checkedColor = "green";
 
   return (
     <Checkbox
+      onClick={onClick}
+      checked={checked}
       icon={<RadioButtonUncheckedIcon />}
       checkedIcon={<CheckCircleIcon />}
       sx={{ "&.Mui-checked": { color: checkedColor } }}
@@ -26,142 +30,377 @@ function CircleCheckbox() {
   );
 }
 
-function TaskTagMenu({ selectedTag, handleTagClick }) {
-  const tags = ["beans", "boots", "tigers"];
+function TaskTextField({ textSubmitHandler, onTextChange }) {
+  const { input, setInput, onInputChange } = useControlledInput();
+  const { validateTaskTag } = useTaskContext();
+
+  const [error, setError] = useState(false);
+
+  const onClick = () => {
+    const { status, value } = validateTaskTag(input);
+
+    if (status == "error" && value.name != "emptyTag") setError(value);
+    else setError(null);
+  };
+
+  const handleTextSubmit = () => {
+    const { status, value } = validateTaskTag(input);
+
+    if (status == "success") {
+      textSubmitHandler(input);
+    } else setError(value);
+  };
+
+  const handleTextChange = (event) =>
+    onTextChange(event, {
+      inputSetter: setInput,
+      onInputChange,
+      errorSetter: setError,
+    });
 
   return (
-    <div className="p-4 rounded-lg border min-w-[100px] bg-white">
-      <div className="font-medium mb-1">Tags</div>
-      <div className="flex flex-col">
-        {tags.map((tag) => (
-          <div
-            className="py-1 hover:cursor-pointer data-[selected=true]:font-medium odd:border-t-2 odd:border-b-2 first:!border-t-0 last:!border-b-0"
-            id={tag}
-            onClick={() => handleTagClick(tag)}
-            data-selected={tag == selectedTag}
-          >
-            #{tag}
+    <TextInput
+      onClick={onClick}
+      input={input}
+      disabled={error?.name == "maxTag"}
+      onChange={handleTextChange}
+      placeholder="Create Tag"
+      InputAdornment={
+        <Add className="hover:cursor-pointer" onClick={handleTextSubmit} />
+      }
+      error={error?.desc}
+    />
+  );
+}
+
+function TaskTagMenuItem({
+  tag,
+  tagId,
+  selectedTag,
+  onTagSelect,
+  onTagDelete,
+  onTagEdit,
+  onTagTextChange,
+}) {
+  const { validateTaskTag } = useTaskContext();
+  const { value: inEditMode, toggle } = useToggle(false);
+  const { input, setInput, onInputChange } = useControlledInput(tag);
+
+  const [error, setError] = useState(null);
+
+  const handleTagTextChange = (event) =>
+    onTagTextChange(
+      event,
+      {
+        inputSetter: setInput,
+        errorSetter: setError,
+        onInputChange,
+      },
+      tagId
+    );
+
+  const handleConfirmChange = () => {
+    const { status } = validateTaskTag(input, tagId);
+
+    if (status == "success") {
+      toggle();
+      onTagEdit(input);
+    }
+  };
+
+  const handleDelete = () => {
+    if (inEditMode) {
+      toggle();
+    } else onTagDelete();
+  };
+
+  return (
+    <div
+      className="p-1 rounded-md hover:cursor-pointer hover:bg-hover-1 data-[selected=true]:font-medium group/tag grid grid-cols-[minmax(0,1fr),_max-content,_max-content] gap-x-1 items-start"
+      key={tag}
+      data-selected={tag == selectedTag}
+    >
+      {!inEditMode ? (
+        <>
+          <div onClick={() => onTagSelect()} className="overflow-clip">
+            {tag}
           </div>
-        ))}
-      </div>
+          <Edit
+            onClick={toggle}
+            className="invisible group-hover/tag:visible flex-1 hover:bg-hover-2 rounded-md"
+          />
+        </>
+      ) : (
+        <>
+          <TextInput
+            error={error?.desc}
+            variant="standard"
+            inputRef={(node) => {
+              if (node) {
+                node.focus();
+              }
+            }}
+            input={input}
+            onChange={handleTagTextChange}
+          />
+          <Done
+            onClick={handleConfirmChange}
+            className="invisible group-hover/tag:visible flex-1 hover:bg-hover-2 rounded-md"
+          />
+        </>
+      )}
+      <Clear
+        onClick={handleDelete}
+        className="invisible group-hover/tag:visible flex-1 hover:bg-hover-2 rounded-md"
+      />
     </div>
   );
 }
 
-function TaskTag({ isMenuOpen, handleMenuClick }) {
-  const [selectedTag, setSelectedTag] = useState("beans");
+function TaskTagMenu({
+  selectedTag,
+  tagSelectHandler,
+  tagDeleteHandler,
+  tagCreateHandler,
+  handleClose,
+}) {
+  const { taskTags: tags, renameTaskTag, validateTaskTag } = useTaskContext();
 
-  const handleTagClick = (tag) => {
-    setSelectedTag(tag);
-    handleMenuClick();
+  const [error, setError] = useState(null);
+
+  const attachMenuClose = (cb) => {
+    handleClose();
+    cb();
+  };
+
+  const handleTagSelect = (id) => attachMenuClose(() => tagSelectHandler(id));
+
+  const handleTagDelete = (id) => {
+    if (error == "tagLimitReached") {
+      setError(null);
+    }
+
+    tagDeleteHandler(id);
+  };
+
+  const textSubmitHandler = (input) => {
+    const id = tagCreateHandler(input);
+    handleTagSelect(id);
+  };
+
+  const onTextChange = (event, context, tagId = null) => {
+    const { inputSetter, onInputChange, errorSetter } = context;
+
+    const prefix = "#";
+    const hasLength = event.target.value.length;
+    const isPrefixed = event.target.value[0] === prefix;
+
+    if (prefix != "" && hasLength && !isPrefixed) {
+      inputSetter(prefix + event.target.value);
+    } else onInputChange(event);
+
+    const tagName = isPrefixed
+      ? event.target.value
+      : prefix + event.target.value;
+
+    const { status, value } = validateTaskTag(tagName, tagId);
+
+    if (status == "error") errorSetter(value);
+    else if (status == "success") errorSetter(null);
   };
 
   return (
-    <div className="relative">
-      <div
-        onClick={handleMenuClick}
-        className="px-2 py-[0.125rem] rounded-sm hover:cursor-pointer hover:bg-gray-100 font-medium"
-      >
-        #{selectedTag}
-      </div>
-      {isMenuOpen && (
-        <div className="absolute right-0 z-10">
-          <TaskTagMenu
-            selectedTag={selectedTag}
-            handleTagClick={handleTagClick}
-          />
+    <div className="p-4 rounded-lg border w-[225px] bg-white flex flex-col gap-y-2">
+      <div>
+        <div className="font-medium">Tags</div>
+        <div className="flex flex-col">
+          {tags.map(({ tagName: tag, tagId }) => (
+            <TaskTagMenuItem
+              key={tag}
+              tag={tag}
+              tagId={tagId}
+              selectedTag={selectedTag}
+              onTagSelect={() => handleTagSelect(tagId)}
+              onTagDelete={() => handleTagDelete(tagId)}
+              onTagEdit={(name) => renameTaskTag(tagId, name)}
+              onTagTextChange={onTextChange}
+            />
+          ))}
         </div>
+      </div>
+      <hr />
+      <div className="flex gap-x-2 items-center my-1">
+        <TaskTextField
+          textSubmitHandler={textSubmitHandler}
+          onTextChange={onTextChange}
+        />
+      </div>
+      {Boolean(tags.length) && (
+        <>
+          <hr />
+          <div
+            className="px-2 py-1  hover:cursor-pointer hover:bg-hover-1"
+            onClick={() => handleTagSelect(null)}
+          >
+            Clear Tag
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-function Task({ taskContent, checked, handleMenuClick, isMenuOpen }) {
+function TagButton({ tag }) {
   return (
-    <div className="grid w-full grid-cols-[42px,_1fr,_0fr] gap-x-2 items-center hover:bg-gray-50 px-2">
-      <CircleCheckbox />
-      <div>{taskContent}</div>
-      <TaskTag isMenuOpen={isMenuOpen} handleMenuClick={handleMenuClick} />
+    <div className="px-2 py-[0.125rem] rounded-sm hover:cursor-pointer hover:bg-hover-2 font-medium whitespace-nowrap">
+      {tag ?? "#"}
     </div>
   );
 }
 
-function AddTaskMenu() {
+function TaskTag({ taskId, tagId }) {
+  const { dispatchTasks, getTagNameById, createTaskTag, deleteTaskTag } =
+    useTaskContext();
+
+  const handleTagClick = (newTagId) => {
+    dispatchTasks({ type: "change-task", taskId, change: { tagId: newTagId } });
+  };
+
+  const handleTextSubmit = (name) => createTaskTag(name, taskId);
+
+  const tag = getTagNameById(tagId);
+
   return (
-    <div className="w-[400px] p-8 rounded-md bg-white flex flex-col gap-y-4">
-      <h3>Create a new task</h3>
-      <TextField label="Task Name" size="small" variant="outlined" fullWidth />
-      <TextButton text="Add Task" variant="solid" width="w-full" />
-      {/* <input /> */}
+    <Menu
+      placement={"bottom-end"}
+      Base={<TagButton tag={tag} />}
+      Popup={
+        <TaskTagMenu
+          selectedTag={tag}
+          tagSelectHandler={handleTagClick}
+          tagDeleteHandler={deleteTaskTag}
+          tagCreateHandler={handleTextSubmit}
+        />
+      }
+    />
+  );
+}
+
+function Task({ taskContent, taskId, tagId, checked, isMenuOpen }) {
+  const { dispatchTasks } = useTaskContext();
+
+  const onClick = () =>
+    dispatchTasks({
+      type: "change-task",
+      taskId,
+      change: { isTaskChecked: !checked },
+    });
+
+  return (
+    <div className="px-2 grid w-full grid-cols-[42px,_minmax(0,1fr),_0fr] gap-x-2 items-center hover:bg-hover-1">
+      <CircleCheckbox checked={checked} onClick={onClick} />
+      <TaskDialog taskContent={taskContent} taskId={taskId} tagId={tagId} />
+      <TaskTag taskId={taskId} tagId={tagId} isMenuOpen={isMenuOpen} />
     </div>
   );
 }
 
-function AddTask({ onClick }) {
-  const { value, setValue } = useToggle(false);
+function AddTaskMenu({ hideMenu }) {
+  const { dispatchTasks, validateTask } = useTaskContext();
+  const { input, setInput, onInputChange } = useControlledInput();
+  const [error, setError] = useState(null);
 
-  const setTrue = () => setValue(true);
+  const onKeyDown = (event) => {
+    if (event.key == "Enter" && error == null) {
+      dispatchTasks({ type: "add-task", content: input });
+      hideMenu();
+    } else if (event.key == "Escape") {
+      hideMenu();
+    }
+  };
+
+  const onChange = (event) => {
+    // handle text change
+    onInputChange(event);
+
+    // set error if appropriate
+    const { status, value } = validateTask(event.target.value);
+
+    if (status == "error") setError(value);
+    else setError(null);
+  };
+
+  return (
+    <>
+      <div></div>
+      <div className="relative">
+        <TextInput
+          inputRef={(node) => {
+            if (node) {
+              node.focus();
+            }
+          }}
+          error={error?.desc}
+          input={input}
+          onKeyDown={onKeyDown}
+          onChange={onChange}
+          placeholder="Task name"
+          onBlur={hideMenu}
+        />
+        <div className="absolute right-0 -bottom-6 text-gray-400 text-sm">
+          Press Enter to submit, Esc to cancel.
+        </div>
+      </div>
+    </>
+  );
+}
+
+function AddTask() {
+  const { value: showMenu, toggle, setValue } = useToggle(false);
+
   const setFalse = () => setValue(false);
 
   return (
     <>
       <div
-        onClick={setTrue}
-        className="px-2 gap-x-2 grid grid-cols-[42px,_1fr] text-gray-400 hover:text-black hover:cursor-pointer"
+        onClick={toggle}
+        className="px-2 gap-x-2 grid grid-cols-[42px,_1fr] hover:cursor-pointer hover:bg-hover-1 h-[42px] items-center"
       >
-        <div className="justify-self-center">
-          <Add />
-        </div>
-        <div>Add Task</div>
+        {showMenu ? (
+          <AddTaskMenu hideMenu={setFalse} />
+        ) : (
+          <>
+            <div className="justify-self-center">
+              <Add />
+            </div>
+            <div>Add Task</div>
+          </>
+        )}
       </div>
-      {value && (
-        <LightboxMenu showLightbox={value} closeLightbox={setFalse}>
-          <AddTaskMenu />
-        </LightboxMenu>
-      )}
     </>
   );
 }
 
-function createNewTask(content) {
-  return { taskId: uuidv4(), taskContent: content, isTaskChecked: false };
-}
-
-function tasksReducer(state, action) {
-  switch (action.type) {
-    case "add-task": {
-      return [...state, createNewTask(action.content)];
-    }
-  }
-}
-
 export default function TaskList() {
-  const initialTask = createNewTask("Get groceries");
-  const [tasks, dispatchTask] = useReducer(tasksReducer, [initialTask]);
-
-  const [selectedMenu, setSelectedMenu] = useState(null);
-
-  const handleMenuClick = (taskId) => {
-    setSelectedMenu((prev) => {
-      if (prev == taskId) return null;
-      else return taskId;
-    });
-  };
+  const { getTasks } = useTaskContext();
+  const tasks = getTasks();
 
   return (
-    <div className="w-[400px]">
-      <AddTask />
-      {tasks.map(({ taskId, taskContent, isTaskChecked }) => (
+    <div className="w-[400px] p-2">
+      <div className="px-2 flex justify-between">
+        <h3>Today's Tasks</h3>
+        <TaskListBar />
+      </div>
+      {tasks.map(({ taskId, tagId, taskContent, isTaskChecked }) => (
         <Task
-          id={taskId}
+          key={taskId}
           taskId={taskId}
           taskContent={taskContent}
+          tagId={tagId}
           checked={isTaskChecked}
-          isMenuOpen={taskId == selectedMenu}
-          handleMenuClick={() => handleMenuClick(taskId)}
         />
       ))}
-      <AddTaskMenu />
+      <AddTask />
     </div>
   );
 }
